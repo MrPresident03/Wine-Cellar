@@ -1,0 +1,6 @@
+{
+  "name": "Wine Cellar",
+  "description": "Premium home wine cellar manager with inventory database, temperature tracking, and climate monitoring dashboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
