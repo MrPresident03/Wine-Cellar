@@ -217,26 +217,28 @@ fun InventoryScreen(
                         ),
                         color = Color.White
                     )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .background(
-                                    color = if (isAlertActive) Color(0xFFEF4444) else MaterialTheme.colorScheme.secondary,
-                                    shape = CircleShape
-                                )
-                        )
-                        Text(
-                            text = if (isAlertActive) "ATTENTION: FLUID LIMITS EXCEEDED" else "INTEGRATED MONITORS SAFE",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp
-                            ),
-                            color = if (isAlertActive) Color(0xFFEF4444) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f)
-                        )
+                    if (isAlertActive) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(
+                                        color = Color(0xFFEF4444),
+                                        shape = CircleShape
+                                    )
+                            )
+                            Text(
+                                text = "ATTENTION: FLUID LIMITS EXCEEDED",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.2.sp
+                                ),
+                                color = Color(0xFFEF4444)
+                            )
+                        }
                     }
                 }
 
@@ -585,15 +587,6 @@ fun InventoryScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
-                    Text(
-                        text = "Rack Master Map (18 x 10)",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-
                     // Deluxe Shelf Box
                     Card(
                         modifier = Modifier
@@ -627,24 +620,14 @@ fun InventoryScreen(
                                             val existingBottle = bottleMap[r to c]
                                             val matchesSearch = existingBottle != null && matchedIds.contains(existingBottle.id)
 
-                                            val cellBgColor = if (existingBottle != null) {
-                                                when {
-                                                    existingBottle.varietal.contains("Cabernet", ignoreCase = true) || existingBottle.varietal.contains("Margaux", ignoreCase = true) || existingBottle.varietal.contains("Shiraz", ignoreCase = true) -> Color(0xFF6B0E23)
-                                                    existingBottle.varietal.contains("Chardonnay", ignoreCase = true) || existingBottle.varietal.contains("Sauvignon", ignoreCase = true) || existingBottle.varietal.contains("White", ignoreCase = true) -> Color(0xFFE5B54F)
-                                                    existingBottle.varietal.contains("Rose", ignoreCase = true) -> Color(0xFFE98895)
-                                                    existingBottle.varietal.contains("Champagne", ignoreCase = true) -> Color(0xFFCF9E53)
-                                                    else -> Color(0xFF8B1229)
-                                                }
-                                            } else {
-                                                MaterialTheme.colorScheme.background.copy(alpha = 0.15f)
-                                            }
-
                                             Box(
                                                 modifier = Modifier
                                                     .weight(1f)
                                                     .aspectRatio(0.85f)
                                                     .clip(RoundedCornerShape(3.dp))
-                                                    .background(cellBgColor)
+                                                    .background(
+                                                        if (existingBottle != null) Color.Transparent else MaterialTheme.colorScheme.background.copy(alpha = 0.15f)
+                                                    )
                                                     .border(
                                                         width = if (existingBottle != null && matchesSearch) 1.5.dp else 0.5.dp,
                                                         color = when {
@@ -668,13 +651,40 @@ fun InventoryScreen(
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 if (existingBottle != null) {
-                                                    // High-performance subtle glass bottle glossy reflection bar inside cell
+                                                    val bitmap = remember(existingBottle.photoUri) {
+                                                        if (existingBottle.photoUri != null && !existingBottle.photoUri.startsWith("preset_")) {
+                                                            try {
+                                                                BitmapFactory.decodeFile(existingBottle.photoUri)?.asImageBitmap()
+                                                            } catch (e: Exception) {
+                                                                null
+                                                            }
+                                                        } else {
+                                                            null
+                                                        }
+                                                    }
+
                                                     Box(
-                                                        modifier = Modifier
-                                                            .fillMaxHeight(0.7f)
-                                                            .width(3.dp)
-                                                            .background(Color.White.copy(alpha = 0.25f), RoundedCornerShape(1.dp))
-                                                    )
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        if (bitmap != null) {
+                                                            Image(
+                                                                bitmap = bitmap,
+                                                                contentDescription = "Stored wine bottle picture",
+                                                                contentScale = ContentScale.Crop,
+                                                                modifier = Modifier.fillMaxSize()
+                                                            )
+                                                        } else {
+                                                            val preset = existingBottle.photoUri ?: when {
+                                                                existingBottle.varietal.contains("Cabernet", ignoreCase = true) || existingBottle.varietal.contains("Margaux", ignoreCase = true) || existingBottle.varietal.contains("Shiraz", ignoreCase = true) -> "preset_cabernet"
+                                                                existingBottle.varietal.contains("Chardonnay", ignoreCase = true) || existingBottle.varietal.contains("Sauvignon", ignoreCase = true) || existingBottle.varietal.contains("White", ignoreCase = true) -> "preset_chardonnay"
+                                                                existingBottle.varietal.contains("Rose", ignoreCase = true) -> "preset_rose"
+                                                                existingBottle.varietal.contains("Champagne", ignoreCase = true) -> "preset_champagne"
+                                                                else -> "preset_cabernet"
+                                                            }
+                                                            WineBottleVector(styleKey = preset)
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -711,17 +721,6 @@ fun InventoryScreen(
             }
 
             // COLLECTION ALPHABETICAL VARIABLE LIST HEADER
-            item {
-                Text(
-                    text = "Quick List Collection (Alphabetical Varietals)",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
             if (sortedBottlesByVarietal.isEmpty()) {
                 item {
                     Box(
