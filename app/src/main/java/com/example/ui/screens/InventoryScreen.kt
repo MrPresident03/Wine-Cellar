@@ -217,6 +217,9 @@ fun InventoryScreen(
     var showDetailDialog by remember { mutableStateOf(false) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var selectedBottleForDetail by remember { mutableStateOf<WineBottle?>(null) }
+    
+    var showEditDialog by remember { mutableStateOf(false) }
+    var selectedBottleForEdit by remember { mutableStateOf<WineBottle?>(null) }
 
     // Prefilled grid row/col
     var prefilledRow by remember { mutableStateOf(1) }
@@ -926,21 +929,14 @@ fun InventoryScreen(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
                                         Text(
-                                            text = buildString {
-                                                append(bottle.wineryName)
-                                                if (bottle.vintage.isNotBlank()) {
-                                                    append(" • ")
-                                                    append(bottle.vintage)
-                                                }
-                                            },
-                                            modifier = Modifier.weight(1f, fill = false),
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 14.sp
+                                            text = if (bottle.vintage.isNotBlank()) bottle.vintage else "N/V",
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                letterSpacing = 0.5.sp
                                             ),
-                                            color = Color.White,
-                                            maxLines = 1,
-                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                            maxLines = 1
                                         )
                                         if (bottle.isAging) {
                                             Box(
@@ -960,6 +956,16 @@ fun InventoryScreen(
                                             }
                                         }
                                     }
+                                    Text(
+                                        text = bottle.wineryName,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        ),
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
                                     if (!bottle.classification.isNullOrBlank()) {
                                         Text(
                                             text = bottle.classification,
@@ -1834,6 +1840,494 @@ fun InventoryScreen(
         }
     }
 
+    // DIALOG 1.2: EDIT BOTTLE DETAILS
+    if (showEditDialog && selectedBottleForEdit != null) {
+        val editBottle = selectedBottleForEdit!!
+        var wineryInput by remember(editBottle.id) { mutableStateOf(editBottle.wineryName) }
+        var classificationInput by remember(editBottle.id) { mutableStateOf(editBottle.classification ?: "") }
+        var varietalInput by remember(editBottle.id) { mutableStateOf(if (standardVarietals.contains(editBottle.varietal)) "" else editBottle.varietal) }
+        var varietalDropdownSelection by remember(editBottle.id) { mutableStateOf(if (standardVarietals.contains(editBottle.varietal)) editBottle.varietal else "Other") }
+        var expandedVarietalDropdown by remember { mutableStateOf(false) }
+        var vintageInput by remember(editBottle.id) { mutableStateOf(editBottle.vintage) }
+        var rowInput by remember(editBottle.id) { mutableStateOf(editBottle.gridRow.toString()) }
+        var colInput by remember(editBottle.id) { mutableStateOf(editBottle.gridCol.toString()) }
+        var priceInput by remember(editBottle.id) { mutableStateOf(editBottle.price?.toString() ?: "") }
+        var isAgingInput by remember(editBottle.id) { mutableStateOf(editBottle.isAging) }
+
+        var capturedPhotoUri by remember(editBottle.id) { mutableStateOf<String?>(editBottle.photoUri) }
+        var showCameraViewfinderEdit by remember { mutableStateOf(false) }
+        var selectedPresetStyle by remember(editBottle.id) { mutableStateOf(if (editBottle.photoUri?.startsWith("preset_") == true) editBottle.photoUri!! else "preset_cabernet") }
+
+        var validationError by remember { mutableStateOf<String?>(null) }
+
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = {
+                Text(
+                    "Edit Wine Details",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 4.dp)
+                ) {
+                    // Winery Input
+                    OutlinedTextField(
+                        value = wineryInput,
+                        onValueChange = { wineryInput = it },
+                        label = { Text("Winery Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("edit_winery_field"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
+                    // Classification Input (Optional)
+                    OutlinedTextField(
+                        value = classificationInput,
+                        onValueChange = { classificationInput = it },
+                        label = { Text("Classification (e.g., Grand Cru, Reserve, Optional)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("edit_classification_field"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
+                    // Varietal Input Dropdown
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = varietalDropdownSelection,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Choose Varietal") },
+                            trailingIcon = {
+                                IconButton(onClick = { expandedVarietalDropdown = true }) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = "Expand Varietals"
+                                    )
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { expandedVarietalDropdown = true }
+                                .testTag("edit_varietal_dropdown"),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            )
+                        )
+                        DropdownMenu(
+                            expanded = expandedVarietalDropdown,
+                            onDismissRequest = { expandedVarietalDropdown = false },
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .heightIn(max = 280.dp)
+                        ) {
+                            standardVarietals.forEach { item ->
+                                DropdownMenuItem(
+                                    text = { Text(item) },
+                                    onClick = {
+                                        varietalDropdownSelection = item
+                                        expandedVarietalDropdown = false
+                                        if (capturedPhotoUri == null || capturedPhotoUri!!.startsWith("preset_")) {
+                                            selectedPresetStyle = when {
+                                                item.contains("Cabernet", ignoreCase = true) || item.contains("Shiraz", ignoreCase = true) -> "preset_cabernet"
+                                                item.contains("Chardonnay", ignoreCase = true) || item.contains("Sauvignon", ignoreCase = true) -> "preset_chardonnay"
+                                                item.contains("Rose", ignoreCase = true) -> "preset_rose"
+                                                item.contains("Champagne", ignoreCase = true) -> "preset_champagne"
+                                                else -> "preset_cabernet"
+                                            }
+                                            capturedPhotoUri = selectedPresetStyle
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Custom input field displays only if "Other" is selected in dropdown
+                    if (varietalDropdownSelection == "Other") {
+                        OutlinedTextField(
+                            value = varietalInput,
+                            onValueChange = { varietalInput = it },
+                            label = { Text("Specify Custom Varietal") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth().testTag("edit_varietal_field"),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            )
+                        )
+                    }
+
+                    // Vintage Input
+                    OutlinedTextField(
+                        value = vintageInput,
+                        onValueChange = { vintageInput = it },
+                        label = { Text("Vintage Year") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("edit_vintage_field"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
+                    // Grid Layout row-col coordinate
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = rowInput,
+                            onValueChange = { rowInput = it },
+                            label = { Text("Row (1-$totalRows)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.weight(1f).testTag("edit_row_field"),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            )
+                        )
+
+                        OutlinedTextField(
+                            value = colInput,
+                            onValueChange = { colInput = it },
+                            label = { Text("Col (1-$totalCols)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.weight(1f).testTag("edit_col_field"),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            )
+                        )
+                    }
+
+                    // Price Input Field (Optional)
+                    OutlinedTextField(
+                        value = priceInput,
+                        onValueChange = { priceInput = it },
+                        label = { Text("Price ($/Bottle, Optional)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("edit_price_field"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
+                    // Aging Toggle Selection Group
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                            .clickable { isAgingInput = !isAgingInput }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Update,
+                                contentDescription = "Aging Flag Icon",
+                                tint = if (isAgingInput) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                            Column {
+                                Text(
+                                    text = "Aging in Cellar",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = if (isAgingInput) "Currently aging" else "Ready to drink / enjoy",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = isAgingInput,
+                            onCheckedChange = { isAgingInput = it },
+                            modifier = Modifier.testTag("edit_aging_switch")
+                        )
+                    }
+
+                    // BOTTLE PHOTOGRAPH Preview
+                    Text(
+                        text = "BOTTLE PHOTOGRAPH",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.padding(top = 6.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Thumbnail Preview
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val thumbBitmap = remember(capturedPhotoUri) {
+                                if (capturedPhotoUri != null && !capturedPhotoUri!!.startsWith("preset_")) {
+                                    try {
+                                        BitmapFactory.decodeFile(capturedPhotoUri)?.asImageBitmap()
+                                    } catch (e: Exception) {
+                                        null
+                                    }
+                                } else {
+                                    null
+                                }
+                            }
+
+                            if (thumbBitmap != null) {
+                                Image(
+                                    bitmap = thumbBitmap,
+                                    contentDescription = "Capture preview",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                WineBottleVector(styleKey = capturedPhotoUri ?: selectedPresetStyle)
+                            }
+                        }
+
+                        // Thumbnail Cam/Aesthetic launch actions
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            val cameraLauncherEdit = rememberLauncherForActivityResult(
+                                contract = ActivityResultContracts.TakePicturePreview()
+                            ) { bitmap: Bitmap? ->
+                                if (bitmap != null) {
+                                    val savedPath = saveBitmapToCache(context, bitmap)
+                                    if (savedPath != null) {
+                                        capturedPhotoUri = savedPath
+                                    }
+                                }
+                            }
+
+                            Button(
+                                onClick = {
+                                    try {
+                                        cameraLauncherEdit.launch(null)
+                                    } catch (e: Exception) {
+                                        showCameraViewfinderEdit = true
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                                    contentColor = MaterialTheme.colorScheme.secondary
+                                ),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth().height(28.dp)
+                            ) {
+                                Icon(Icons.Rounded.PhotoCamera, contentDescription = "Camera", modifier = Modifier.size(12.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Real Camera Photo", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp))
+                            }
+
+                            OutlinedButton(
+                                onClick = { showCameraViewfinderEdit = true },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.fillMaxWidth().height(28.dp)
+                            ) {
+                                Icon(Icons.Rounded.Brush, contentDescription = "Design", modifier = Modifier.size(12.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Aesthetic DSLR Studio", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp))
+                            }
+                        }
+                    }
+
+                    validationError?.let { err ->
+                        Text(
+                            text = err,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val rowParsed = rowInput.toIntOrNull()
+                        val colParsed = colInput.toIntOrNull()
+                        val actualVarietalToSave = if (varietalDropdownSelection == "Other") varietalInput else varietalDropdownSelection
+
+                        when {
+                            wineryInput.isBlank() -> {
+                                validationError = "Winery name cannot be blank."
+                            }
+                            actualVarietalToSave.isBlank() -> {
+                                validationError = "Varietal cannot be blank."
+                            }
+                            vintageInput.isBlank() -> {
+                                validationError = "Vintage year cannot be blank."
+                            }
+                            rowParsed == null || rowParsed !in 1..totalRows -> {
+                                validationError = "Row coordinate must be a valid number between 1 and $totalRows."
+                            }
+                            colParsed == null || colParsed !in 1..totalCols -> {
+                                validationError = "Column coordinate must be a valid number between 1 and $totalCols."
+                            }
+                            else -> {
+                                val parsedPrice = priceInput.toDoubleOrNull()
+                                viewModel.updateBottle(
+                                    editBottle.copy(
+                                        wineryName = wineryInput.trim(),
+                                        classification = classificationInput.trim().ifBlank { null },
+                                        varietal = actualVarietalToSave.trim(),
+                                        vintage = vintageInput.trim(),
+                                        gridRow = rowParsed,
+                                        gridCol = colParsed,
+                                        photoUri = capturedPhotoUri ?: selectedPresetStyle,
+                                        price = parsedPrice,
+                                        isAging = isAgingInput
+                                    )
+                                )
+                                showEditDialog = false
+                            }
+                        }
+                    },
+                    modifier = Modifier.testTag("edit_bottle_save")
+                ) {
+                    Text("Save Changes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
+        )
+
+        // Cam details for showCameraViewfinderEdit
+        if (showCameraViewfinderEdit) {
+            AlertDialog(
+                onDismissRequest = { showCameraViewfinderEdit = false },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Active Viewfinder Shutter", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        IconButton(onClick = { showCameraViewfinderEdit = false }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close Viewfinder", tint = Color.White)
+                        }
+                    }
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            "Choose styled color tone for virtual label preview:",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.6f),
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Studio Presets list selection
+                        val presets = listOf(
+                            "preset_cabernet" to "Deep Cabernet Red",
+                            "preset_chardonnay" to "Amber Oak Chardonnay",
+                            "preset_rose" to "Blush Rose Pink",
+                            "preset_champagne" to "Golden Prestige Champagne"
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            presets.forEach { (key, label) ->
+                                val active = selectedPresetStyle == key
+                                Column(
+                                    modifier = Modifier
+                                        .clickable { selectedPresetStyle = key }
+                                        .padding(4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(width = 14.dp, height = 32.dp)
+                                            .clip(RoundedCornerShape(3.dp))
+                                    ) {
+                                        WineBottleVector(styleKey = key)
+                                    }
+                                    Text(label, style = MaterialTheme.typography.labelSmall, color = if (active) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.6f))
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            capturedPhotoUri = selectedPresetStyle
+                            showCameraViewfinderEdit = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    ) {
+                        // Elegant single big shutter center
+                    }
+                },
+                containerColor = Color(0xFF141414),
+                shape = RoundedCornerShape(24.dp)
+            )
+        }
+    }
+
     // DIALOG 2: BOTTLE DETAIL SCREEN & CONTAINER
     if (showDetailDialog && selectedBottleForDetail != null) {
         val bottle = selectedBottleForDetail!!
@@ -1975,6 +2469,27 @@ fun InventoryScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
                     Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // EDIT DETAILS Action Button
+                    Button(
+                        onClick = {
+                            selectedBottleForEdit = bottle
+                            showEditDialog = true
+                            showDetailDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f),
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth().testTag("edit_wine_details_button"),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(imageVector = Icons.Rounded.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Edit Wine Details", style = MaterialTheme.typography.labelLarge)
+                    }
+
                     Spacer(modifier = Modifier.height(4.dp))
 
                     // DUPLICATE TO NEXT SLOT Action Button

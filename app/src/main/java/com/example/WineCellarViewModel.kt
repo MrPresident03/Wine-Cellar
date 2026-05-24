@@ -247,6 +247,12 @@ class WineCellarViewModel(private val repository: WineCellarRepository) : ViewMo
         }
     }
 
+    fun updateBottle(bottle: WineBottle) {
+        viewModelScope.launch {
+            repository.insertBottle(bottle)
+        }
+    }
+
     fun duplicateBottleToNextColumn(bottle: WineBottle) {
         viewModelScope.launch {
             val all = bottlesState.value
