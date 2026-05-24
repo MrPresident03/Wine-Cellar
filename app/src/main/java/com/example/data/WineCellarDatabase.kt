@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-@Database(entities = [WineBottle::class, TemperatureRecord::class], version = 3, exportSchema = false)
+@Database(entities = [WineBottle::class, TemperatureRecord::class], version = 4, exportSchema = false)
 abstract class WineCellarDatabase : RoomDatabase() {
 
     abstract fun wineCellarDao(): WineCellarDao
@@ -19,6 +19,12 @@ abstract class WineCellarDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: WineCellarDatabase? = null
 
+        val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE wine_bottles ADD COLUMN classification TEXT DEFAULT NULL")
+            }
+        }
+
         fun getDatabase(context: Context, scope: CoroutineScope): WineCellarDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -26,6 +32,7 @@ abstract class WineCellarDatabase : RoomDatabase() {
                     WineCellarDatabase::class.java,
                     "wine_cellar_database"
                 )
+                .addMigrations(MIGRATION_3_4)
                 .fallbackToDestructiveMigration()
                 .addCallback(WineCellarDatabaseCallback(scope))
                 .build()

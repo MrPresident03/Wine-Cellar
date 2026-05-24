@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class WineBottle(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val wineryName: String,
+    val classification: String? = null,
     val varietal: String,
     val vintage: String,
     val gridRow: Int,

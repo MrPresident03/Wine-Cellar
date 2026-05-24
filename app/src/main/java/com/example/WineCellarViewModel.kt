@@ -74,7 +74,8 @@ class WineCellarViewModel(private val repository: WineCellarRepository) : ViewMo
             result = result.filter {
                 it.wineryName.contains(query, ignoreCase = true) ||
                 it.varietal.contains(query, ignoreCase = true) ||
-                it.vintage.contains(query, ignoreCase = true)
+                it.vintage.contains(query, ignoreCase = true) ||
+                (it.classification?.contains(query, ignoreCase = true) == true)
             }
         }
 
@@ -217,10 +218,11 @@ class WineCellarViewModel(private val repository: WineCellarRepository) : ViewMo
     }
 
     // Manage Bottles
-    fun addBottle(winery: String, varietal: String, vintage: String, row: Int, col: Int, photoUri: String? = null, price: Double? = null, isAging: Boolean = false) {
+    fun addBottle(winery: String, classification: String?, varietal: String, vintage: String, row: Int, col: Int, photoUri: String? = null, price: Double? = null, isAging: Boolean = false) {
         viewModelScope.launch {
             val bottle = WineBottle(
                 wineryName = winery.trim(),
+                classification = classification?.trim()?.ifBlank { null },
                 varietal = varietal.trim(),
                 vintage = vintage.trim(),
                 gridRow = row,
@@ -230,6 +232,52 @@ class WineCellarViewModel(private val repository: WineCellarRepository) : ViewMo
                 isAging = isAging
             )
             repository.insertBottle(bottle)
+        }
+    }
+
+    fun updateBottleLocation(bottle: WineBottle, newRow: Int, newCol: Int) {
+        viewModelScope.launch {
+            val existingAtTarget = bottlesState.value.firstOrNull { it.gridRow == newRow && it.gridCol == newCol }
+            if (existingAtTarget != null) {
+                // Swap locations! Move existing bottle to the old bottle's location
+                repository.insertBottle(existingAtTarget.copy(gridRow = bottle.gridRow, gridCol = bottle.gridCol))
+            }
+            // Move the selected bottle to the new location
+            repository.insertBottle(bottle.copy(gridRow = newRow, gridCol = newCol))
+        }
+    }
+
+    fun duplicateBottleToNextColumn(bottle: WineBottle) {
+        viewModelScope.launch {
+            val all = bottlesState.value
+            var targetCol = bottle.gridCol + 1
+            var targetRow = bottle.gridRow
+            
+            // Loop sequentially across columns and then rows to find the next empty slot
+            var found = false
+            while (targetRow <= 18) {
+                while (targetCol <= 10) {
+                    val occupied = all.any { it.gridRow == targetRow && it.gridCol == targetCol }
+                    if (!occupied) {
+                        found = true
+                        break
+                    }
+                    targetCol++
+                }
+                if (found) break
+                targetRow++
+                targetCol = 1 // reset to first column
+            }
+            
+            if (found) {
+                val newBottle = bottle.copy(
+                    id = 0, // safe auto-generate id
+                    gridRow = targetRow,
+                    gridCol = targetCol,
+                    timestamp = System.currentTimeMillis()
+                )
+                repository.insertBottle(newBottle)
+            }
         }
     }
 

@@ -159,19 +159,59 @@ fun InventoryScreen(
     var showFilterMenu by remember { mutableStateOf(false) }
     val standardVarietals = remember {
         listOf(
+            "Albariño / Alvarinho",
+            "Assyrtiko",
+            "Barbera",
+            "Cabernet Franc",
             "Cabernet Sauvignon",
-            "Pinot Noir",
+            "Carmenere",
             "Chardonnay",
-            "Shiraz / Syrah",
-            "Sauvignon Blanc",
+            "Chenin Blanc",
+            "Fiano",
+            "Furmint",
+            "Gamay",
+            "Garganega",
+            "Gewürztraminer",
+            "Glera",
+            "Godello",
+            "Grenache / Garnacha",
+            "Grüner Veltliner",
+            "Malbec",
+            "Marsanne",
             "Merlot",
-            "Pinot Grigio",
+            "Moscato / Muscat",
+            "Mourvèdre / Monastrell",
+            "Müller-Thurgau",
+            "Nebbiolo",
+            "Nero d'Avola",
+            "Palomino",
+            "Pedro Ximénez",
+            "Petit Verdot",
+            "Petite Sirah",
+            "Pinot Gris / Pinot Grigio",
+            "Pinot Noir",
+            "Pinotage",
             "Riesling",
-            "Champagne / Sparkling",
-            "Rosé",
+            "Roussanne",
+            "Sangiovese",
+            "Sauvignon Blanc",
+            "Sémillon",
+            "Syrah / Shiraz",
+            "Tannat",
+            "Tempranillo",
+            "Torrontés",
+            "Touriga Nacional",
+            "Vermentino",
+            "Viognier",
+            "Zinfandel / Primitivo",
             "Other"
         )
     }
+
+    val sharedPrefs = remember { context.getSharedPreferences("wine_cellar_prefs", android.content.Context.MODE_PRIVATE) }
+    var cellarName by remember { mutableStateOf(sharedPrefs.getString("cellar_name", "My Cellar") ?: "My Cellar") }
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var cellarNameInput by remember { mutableStateOf("") }
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showDetailDialog by remember { mutableStateOf(false) }
@@ -208,19 +248,72 @@ fun InventoryScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = "My Cellar",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = (-0.5).sp
-                        ),
-                        color = Color.White
-                    )
+                Column(
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .clickable {
+                                    cellarNameInput = cellarName
+                                    showRenameDialog = true
+                                }
+                                .testTag("edit_cellar_name_trigger")
+                        ) {
+                            Text(
+                                text = cellarName,
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = (-0.5).sp
+                                ),
+                                color = Color.White,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = "Edit Cellar Name",
+                                tint = Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                .testTag("wine_count_badge")
+                        ) {
+                            val displayText = if (bottles.size != allBottles.size) {
+                                "${bottles.size} of ${allBottles.size}"
+                            } else {
+                                "${allBottles.size} wines"
+                            }
+                            Text(
+                                text = displayText,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.2.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                                maxLines = 1
+                            )
+                        }
+                    }
                     if (isAlertActive) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(top = 4.dp)
                         ) {
                             Box(
                                 modifier = Modifier
@@ -824,17 +917,30 @@ fun InventoryScreen(
                                     }
                                 }
 
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(1.dp)
+                                ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
                                         Text(
-                                            text = bottle.varietal,
+                                            text = buildString {
+                                                append(bottle.wineryName)
+                                                if (bottle.vintage.isNotBlank()) {
+                                                    append(" • ")
+                                                    append(bottle.vintage)
+                                                }
+                                            },
+                                            modifier = Modifier.weight(1f, fill = false),
                                             style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 14.sp
                                             ),
-                                            color = Color.White
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                         )
                                         if (bottle.isAging) {
                                             Box(
@@ -854,53 +960,132 @@ fun InventoryScreen(
                                             }
                                         }
                                     }
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
+                                    if (!bottle.classification.isNullOrBlank()) {
                                         Text(
-                                            text = "${bottle.wineryName} • ${bottle.vintage}",
-                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                            text = bottle.classification,
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Medium
+                                            ),
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                         )
-                                        if (bottle.price != null && bottle.price > 0.0) {
-                                            Text(
-                                                text = "• $${String.format("%.2f", bottle.price)}",
-                                                style = MaterialTheme.typography.bodySmall.copy(
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    color = MaterialTheme.colorScheme.secondary
-                                                )
-                                            )
-                                        }
                                     }
+                                    Text(
+                                        text = bottle.varietal,
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Normal
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
                                 }
                             }
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.Center
                             ) {
-                                Text(
-                                    text = "R${bottle.gridRow} : C${String.format("%02d", bottle.gridCol)}",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                                )
-                                Icon(
-                                    imageVector = Icons.Rounded.ChevronRight,
-                                    contentDescription = "Details",
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = "R${bottle.gridRow} : C${String.format("%02d", bottle.gridCol)}",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Rounded.ChevronRight,
+                                        contentDescription = "Details",
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                if (bottle.price != null && bottle.price > 0.0) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "$${String.format("%.2f", bottle.price)}",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        ),
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    // DIALOG -1: RENAME CELLAR DIALOG
+    if (showRenameDialog) {
+        AlertDialog(
+            onDismissRequest = { showRenameDialog = false },
+            title = {
+                Text(
+                    text = "Rename Cellar",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Customize the name displayed as your cellar header.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    OutlinedTextField(
+                        value = cellarNameInput,
+                        onValueChange = { cellarNameInput = it },
+                        label = { Text("Cellar Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("rename_cellar_input"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val trimmed = cellarNameInput.trim()
+                        if (trimmed.isNotEmpty()) {
+                            cellarName = trimmed
+                            sharedPrefs.edit().putString("cellar_name", trimmed).apply()
+                        }
+                        showRenameDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRenameDialog = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     }
 
     // DIALOG 0: CLIMATE MONITOR HISTORY CHART popup
@@ -1074,6 +1259,7 @@ fun InventoryScreen(
     // DIALOG 1: ADD BOTTLE DIALOG FORM
     if (showAddDialog) {
         var wineryInput by remember { mutableStateOf("") }
+        var classificationInput by remember { mutableStateOf("") }
         var varietalInput by remember { mutableStateOf("") }
         var varietalDropdownSelection by remember { mutableStateOf(standardVarietals[0]) }
         var expandedVarietalDropdown by remember { mutableStateOf(false) }
@@ -1120,6 +1306,19 @@ fun InventoryScreen(
                         )
                     )
 
+                    // Classification Input (Optional)
+                    OutlinedTextField(
+                        value = classificationInput,
+                        onValueChange = { classificationInput = it },
+                        label = { Text("Classification (e.g., Grand Cru, Reserve, Optional)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("add_classification_field"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
                     // Varietal Input Dropdown
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
@@ -1147,7 +1346,9 @@ fun InventoryScreen(
                         DropdownMenu(
                             expanded = expandedVarietalDropdown,
                             onDismissRequest = { expandedVarietalDropdown = false },
-                            modifier = Modifier.fillMaxWidth(0.85f)
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .heightIn(max = 280.dp)
                         ) {
                             standardVarietals.forEach { item ->
                                 DropdownMenuItem(
@@ -1428,6 +1629,7 @@ fun InventoryScreen(
                                 val parsedPrice = priceInput.toDoubleOrNull()
                                 viewModel.addBottle(
                                     winery = wineryInput,
+                                    classification = classificationInput,
                                     varietal = actualVarietalToSave,
                                     vintage = vintageInput,
                                     row = rowParsed,
@@ -1635,6 +1837,11 @@ fun InventoryScreen(
     // DIALOG 2: BOTTLE DETAIL SCREEN & CONTAINER
     if (showDetailDialog && selectedBottleForDetail != null) {
         val bottle = selectedBottleForDetail!!
+        var showMoveControls by remember(bottle.id) { mutableStateOf(false) }
+        var newRowInput by remember(bottle.id) { mutableStateOf(bottle.gridRow.toString()) }
+        var newColInput by remember(bottle.id) { mutableStateOf(bottle.gridCol.toString()) }
+        var moveError by remember(bottle.id) { mutableStateOf<String?>(null) }
+
         AlertDialog(
             onDismissRequest = { showDetailDialog = false },
             icon = {
@@ -1687,7 +1894,9 @@ fun InventoryScreen(
             },
             text = {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -1701,6 +1910,20 @@ fun InventoryScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                     Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(8.dp))
+
+                    if (!bottle.classification.isNullOrBlank()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Classification:", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f))
+                            Text(
+                                text = bottle.classification,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -1748,6 +1971,116 @@ fun InventoryScreen(
                             fontWeight = FontWeight.Bold,
                             color = if (bottle.isAging) MaterialTheme.colorScheme.primary else Color(0xFF10B981)
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // DUPLICATE TO NEXT SLOT Action Button
+                    Button(
+                        onClick = {
+                            viewModel.duplicateBottleToNextColumn(bottle)
+                            showDetailDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(imageVector = Icons.Rounded.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Duplicate to Next Slot", style = MaterialTheme.typography.labelLarge)
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // MOVE/RELOCATE Card
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                            .padding(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showMoveControls = !showMoveControls }
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Icon(Icons.Rounded.LocationOn, contentDescription = "Move icon", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.secondary)
+                                Text(
+                                    "Relocate / Swap Slot",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                            Icon(
+                                imageVector = if (showMoveControls) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Expand controls"
+                            )
+                        }
+
+                        if (showMoveControls) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = newRowInput,
+                                    onValueChange = { newRowInput = it },
+                                    label = { Text("Row") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    singleLine = true,
+                                    modifier = Modifier.weight(1f),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                    )
+                                )
+                                OutlinedTextField(
+                                    value = newColInput,
+                                    onValueChange = { newColInput = it },
+                                    label = { Text("Col") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    singleLine = true,
+                                    modifier = Modifier.weight(1f),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                    )
+                                )
+                                Button(
+                                    onClick = {
+                                        val r = newRowInput.toIntOrNull()
+                                        val c = newColInput.toIntOrNull()
+                                        if (r != null && r in 1..totalRows && c != null && c in 1..totalCols) {
+                                            viewModel.updateBottleLocation(bottle, r, c)
+                                            showDetailDialog = false
+                                        } else {
+                                            moveError = "Invalid coordinates: 1-$totalRows, 1-$totalCols"
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.height(56.dp)
+                                ) {
+                                    Text("Go")
+                                }
+                            }
+                            moveError?.let {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
                     }
                 }
             },
