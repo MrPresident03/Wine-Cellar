@@ -12,4 +12,5 @@ class WineCellarApplication : Application() {
 
     val database by lazy { WineCellarDatabase.getDatabase(this, applicationScope) }
     val repository by lazy { WineCellarRepository(database.wineCellarDao()) }
+    val syncManager by lazy { com.example.data.FirebaseSyncManager(this, repository, applicationScope) }
 }

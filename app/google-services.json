@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "969319706983",
+    "project_id": "wine-cellar-app-c1107",
+    "storage_bucket": "wine-cellar-app-c1107.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969319706983:android:09f99a037fe1183f76ffc2",
+        "android_client_info": {
+          "package_name": "com.aistudio.winecellar.vntgrk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATKV0t7n2uJCDZaq0SjRYATqz8XHLP17c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

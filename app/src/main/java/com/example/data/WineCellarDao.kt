@@ -10,8 +10,20 @@ interface WineCellarDao {
     @Query("SELECT * FROM wine_bottles ORDER BY varietal ASC, vintage DESC")
     fun getAllBottles(): Flow<List<WineBottle>>
 
+    @Query("SELECT * FROM wine_bottles WHERE gridRow = :row AND gridCol = :col LIMIT 1")
+    suspend fun getBottleAt(row: Int, col: Int): WineBottle?
+
+    @Query("SELECT * FROM wine_bottles")
+    suspend fun getBottlesOnce(): List<WineBottle>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBottle(bottle: WineBottle)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBottles(bottles: List<WineBottle>)
+
+    @Query("DELETE FROM wine_bottles")
+    suspend fun clearAllBottles()
 
     @Delete
     suspend fun deleteBottle(bottle: WineBottle)

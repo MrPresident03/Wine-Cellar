@@ -19,7 +19,10 @@ enum class TimeFilter {
     DAY, WEEK, MONTH
 }
 
-class WineCellarViewModel(private val repository: WineCellarRepository) : ViewModel() {
+class WineCellarViewModel(
+    private val repository: WineCellarRepository,
+    val syncManager: com.example.data.FirebaseSyncManager
+) : ViewModel() {
 
     // Active screen navigation state
     private val _activeTab = MutableStateFlow(0)
@@ -176,6 +179,20 @@ class WineCellarViewModel(private val repository: WineCellarRepository) : ViewMo
     private val _lastSyncTimestamp = MutableStateFlow(System.currentTimeMillis() - 12 * 60 * 1000) // Default 12 mins ago
     val lastSyncTimestamp: StateFlow<Long> = _lastSyncTimestamp.asStateFlow()
 
+    // Skipped login flow
+    private val _userSkippedLogin = MutableStateFlow(false)
+    val userSkippedLogin: StateFlow<Boolean> = _userSkippedLogin.asStateFlow()
+
+    fun skipLogin() {
+        _userSkippedLogin.value = true
+    }
+
+    fun logout() {
+        syncManager.setUserEmail("")
+        syncManager.enableFirebase(false)
+        _userSkippedLogin.value = false
+    }
+
     fun selectTab(tabIndex: Int) {
         _activeTab.value = tabIndex
     }
@@ -294,11 +311,14 @@ class WineCellarViewModel(private val repository: WineCellarRepository) : ViewMo
     }
 }
 
-class WineCellarViewModelFactory(private val repository: WineCellarRepository) : ViewModelProvider.Factory {
+class WineCellarViewModelFactory(
+    private val repository: WineCellarRepository,
+    private val syncManager: com.example.data.FirebaseSyncManager
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WineCellarViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return WineCellarViewModel(repository) as T
+            return WineCellarViewModel(repository, syncManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
