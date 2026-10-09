@@ -1,647 +1,292 @@
 package com.example.ui.screens
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.Logout
+import androidx.compose.material.icons.rounded.PersonAdd
+import androidx.compose.material.icons.rounded.Sensors
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.WineCellarViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.example.data.AuthState
 
 @Composable
-fun SettingsScreen(
-    viewModel: WineCellarViewModel,
-    modifier: Modifier = Modifier
-) {
-    val microcontrollerIp by viewModel.microcontrollerIp.collectAsState()
-    val isConnected by viewModel.isMicrocontrollerConnected.collectAsState()
-    val lowPowerMode by viewModel.lowPowerModeEnabled.collectAsState()
-    val alertThreshold by viewModel.alertTempThreshold.collectAsState()
+fun SettingsScreen(viewModel: WineCellarViewModel) {
+    val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
+    val auth by viewModel.authState.collectAsState()
+    val cellar by viewModel.cellar.collectAsState()
+    val inviteCode by viewModel.inviteCode.collectAsState()
+    val busy by viewModel.busy.collectAsState()
+    val legacyCount by viewModel.legacyCount.collectAsState()
+    val importing by viewModel.importing.collectAsState()
 
-    val syncManager = viewModel.syncManager
-    val isSyncEnabled by syncManager.isFirebaseEnabled.collectAsState()
-    val cellarId by syncManager.cellarId.collectAsState()
-    val pairingCode by syncManager.pairingCode.collectAsState()
-    val syncStatus by syncManager.syncStatus.collectAsState()
-    val userEmail by syncManager.userEmail.collectAsState()
+    var showJoin by remember { mutableStateOf(false) }
+    var joinCode by remember { mutableStateOf("") }
+    var confirmSignOut by remember { mutableStateOf(false) }
 
-    val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
-
-    var hostIpInput by remember { mutableStateOf(microcontrollerIp) }
-    var isTestingConnection by remember { mutableStateOf(false) }
-    var connectionTestLog by remember { mutableStateOf<String?>(null) }
-
-    // Dialog trigger states
-    var showGoogleAuthDialog by remember { mutableStateOf(false) }
+    val email = (auth as? AuthState.SignedIn)?.email ?: ""
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp)
-            .testTag("settings_screen"),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Welcome and Status Header
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
+        Text("Settings", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
+
+        // ---------------------------------------------------------------- account
+        SettingsCard(title = "Account", icon = Icons.Rounded.Logout) {
+            Text("Signed in as", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+            Text(email, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+            OutlinedButton(onClick = { confirmSignOut = true }) { Text("Sign out") }
+        }
+
+        // ---------------------------------------------------------------- sharing
+        SettingsCard(title = "Shared cellar", icon = Icons.Rounded.Group) {
+            val members = cellar?.memberEmails.orEmpty()
             Text(
-                text = "Vault & Cloud Link",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = (-0.5).sp
-                ),
-                color = Color.White
+                if (members.size <= 1) "Only you have access to this cellar." else "People with access:",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape
-                        )
-                )
-                Text(
-                    text = "CLOUD DATABASE & HARDWARE SYNC",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                )
-            }
-        }
-
-        // ==================== CLOUD DATABASE SYNC PANEL (FIREBASE) ====================
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(32.dp)),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-            ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Main Header Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CloudSync,
-                                contentDescription = "Cloud Icon",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = "Firebase Cloud Sync",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Syncs with Cloud Firestore",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-
-                    // High contrast activity status capsule
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                color = if (userEmail.isNotBlank()) Color(0xFF81C784).copy(alpha = 0.15f) else MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
-                            )
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = if (userEmail.isNotBlank()) "ACTIVE" else "OFFLINE",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (userEmail.isNotBlank()) Color(0xFF81C784) else MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-
-                if (userEmail.isNotBlank()) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.AccountCircle,
-                                contentDescription = "Account Icon",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = "Signed in as: $userEmail",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Dataset,
-                                contentDescription = "Database Document",
-                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = "Firestore Node ID: $cellarId",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Button(
-                            onClick = { viewModel.logout() },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                                contentColor = MaterialTheme.colorScheme.error
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Logout,
-                                contentDescription = "Log Out",
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Disconnect & Sign Out", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = "Log in with an email address to store and sync your wines on the secure cloud database automatically.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            textAlign = TextAlign.Center
-                        )
-
-                        Button(
-                            onClick = { showGoogleAuthDialog = true },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Rounded.Login, contentDescription = "Log In", modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Log in with Google Account", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
+            if (members.size > 1) {
+                members.forEach { member ->
+                    Text("• $member", style = MaterialTheme.typography.bodyMedium)
                 }
             }
-        }
-
-        // Section Title: HARDWARE CONFIG
-        Text(
-            text = "HARDWARE INTEGRATION NODE",
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.2.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-            modifier = Modifier.padding(top = 8.dp)
-        )
-
-        // CARD 1: MICROCONTROLLER CONNECTION PANEL
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(32.dp)),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            Text(
+                "To share, create an invite code and have the other person enter it after creating their own account. " +
+                    "Codes work for 7 days.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            val code = inviteCode
+            if (code != null) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Microcontroller Link (Wi-Fi)",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    // Connection status badge
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(
-                                if (isConnected) Color(0xFF1B5E20).copy(alpha = 0.15f)
-                                else Color(0xFFC62828).copy(alpha = 0.15f)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = if (isConnected) Color(0xFF4CAF50) else Color(0xFFE53935),
-                                shape = CircleShape
-                            )
-                            .padding(vertical = 4.dp, horizontal = 10.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            // Blinking light
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isConnected) Color(0xFF4CAF50) else Color(0xFFE53935))
-                            )
-                            Text(
-                                text = if (isConnected) "ONLINE" else "OFFLINE",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (isConnected) Color(0xFF81C784) else Color(0xFFEF5350),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-
-                // Host network fields
-                Text(
-                    text = "Configure IP address of Arduino Mega / ESP8266 webhook module:",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-
-                OutlinedTextField(
-                    value = hostIpInput,
-                    onValueChange = {
-                        hostIpInput = it
-                        viewModel.setMicrocontrollerIp(it)
-                    },
-                    label = { Text("Controller Node IP") },
-                    singleLine = true,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.SettingsEthernet,
-                            contentDescription = "Ethernet controller",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("controller_ip_field")
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Connected Network",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                        Text(
-                            text = "Vault_Cellar_2.4GHz",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    // Test Link Button
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                isTestingConnection = true
-                                connectionTestLog = "Pinging $hostIpInput..."
-                                delay(1200) // Realistic ping trip lag
-                                isTestingConnection = false
-                                connectionTestLog = "Success: Connected via Wi-Fi. Ping latency: 18ms. ESP8266 healthy."
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
-                        shape = RoundedCornerShape(10.dp),
-                        enabled = !isTestingConnection,
-                        modifier = Modifier.testTag("test_link_btn")
-                    ) {
-                        if (isTestingConnection) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 1.5.dp
-                            )
-                        } else {
-                            Text("Test Link", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                }
-
-                connectionTestLog?.let { log ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = log,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (log.contains("Success")) Color(0xFF81C784) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                        )
-                    }
-                }
-            }
-        }
-
-        // CARD 2: LOW POWER NODE TOGGLE
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(32.dp)),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Low-Power Mode",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = "Reduce polling intervals",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                    }
-
-                    Switch(
-                        checked = lowPowerMode,
-                        onCheckedChange = { viewModel.toggleLowPowerMode(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                            uncheckedThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        modifier = Modifier.testTag("power_mode_switch")
-                    )
-                }
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-
-                Text(
-                    text = "Enabling low-power extends microcontroller node battery life significantly by lowering Wi-Fi wake cycles. Recommended if the ESP8266 board runs entirely off solar/lithium cell packs.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-            }
-        }
-
-        // CARD 3: CUSTOM SYSTEM ALERT TEMP THRESHOLDS
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(32.dp)),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = "Temperature Alerts",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-
-                // Display active threshold values
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "High Threshold Alert Trigger",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                    )
-                    Text(
-                        text = "${String.format("%.1f", alertThreshold)}°C",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                // Threshold Slider (10°C to 24°C)
-                Slider(
-                    value = alertThreshold,
-                    onValueChange = { viewModel.setAlertThreshold(it) },
-                    valueRange = 10.0f..25.0f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("threshold_slider")
-                )
-
-                // Summary Note
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.05f),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.NotificationImportant,
-                        contentDescription = "Alert notification info",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "Currently configured to trigger an automated warning layout card on your Main Dashboard if the sensor registers any climate exceeding ${String.format("%.1f", alertThreshold)}°C.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        code,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
+                    IconButton(onClick = { clipboard.setText(AnnotatedString(code)) }) {
+                        Icon(Icons.Rounded.ContentCopy, contentDescription = "Copy code")
+                    }
+                    IconButton(onClick = {
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Join my wine cellar: install the Wine Cellar app, create an account, then choose " +
+                                    "\"Join a cellar\" and enter code $code"
+                            )
+                        }
+                        context.startActivity(Intent.createChooser(send, "Share invite code"))
+                    }) {
+                        Icon(Icons.Rounded.Share, contentDescription = "Share code")
+                    }
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { viewModel.createInvite() }, enabled = !busy) {
+                    Icon(Icons.Rounded.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(if (code == null) "Create invite code" else "New code")
+                }
+                OutlinedButton(onClick = { showJoin = true }, enabled = !busy) { Text("Join another") }
+            }
+        }
+
+        // ---------------------------------------------------------------- sensor
+        SettingsCard(title = "Temperature sensor", icon = Icons.Rounded.Sensors) {
+            Text(
+                "Your ESP32 sends readings straight to the cloud, so both phones see the same history. " +
+                    "Copy these into the sketch in the repo's firmware folder:",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            val c = cellar
+            if (c != null) {
+                CopyableValue("CELLAR_ID", c.id) { clipboard.setText(AnnotatedString(c.id)) }
+                CopyableValue("SENSOR_KEY", c.sensorKey) { clipboard.setText(AnnotatedString(c.sensorKey)) }
+                Text(
+                    "Keep the sensor key private: anyone with it can add readings to this cellar.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            } else {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            }
+        }
+
+        // ---------------------------------------------------------------- data
+        SettingsCard(title = "Data from the previous version", icon = Icons.Rounded.Download) {
+            Text(
+                if (legacyCount > 0) {
+                    "This phone still has $legacyCount bottle${if (legacyCount == 1) "" else "s"} saved by the previous version of the app. " +
+                        "They were copied in when you created your cellar. Run the import again any time; bottles already in the cellar are skipped."
+                } else {
+                    "No data from the previous version was found on this phone."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            if (legacyCount > 0) {
+                Button(onClick = { viewModel.importLegacy() }, enabled = !importing) {
+                    if (importing) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Importing…")
+                    } else {
+                        Text("Import again")
+                    }
                 }
             }
         }
+
+        Text(
+            "Wine Cellar 2.0",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
     }
 
-    // GOOGLE AUTH DIALOG
-    if (showGoogleAuthDialog) {
-        var emailInput by remember { mutableStateOf("") }
-        var emailErr by remember { mutableStateOf<String?>(null) }
-
+    if (showJoin) {
         AlertDialog(
-            onDismissRequest = { showGoogleAuthDialog = false },
-            title = {
-                Text(
-                    "Sign In with Google Account",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
+            onDismissRequest = { showJoin = false },
+            title = { Text("Join another cellar") },
             text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "Enter your account email to link this device instantly with the cloud database:",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        "This phone will switch to the other cellar. Your current cellar isn't deleted; " +
+                            "you can get back to it with an invite code from it.",
+                        style = MaterialTheme.typography.bodySmall
                     )
-
                     OutlinedTextField(
-                        value = emailInput,
-                        onValueChange = { 
-                            emailInput = it
-                            emailErr = null
-                        },
-                        label = { Text("Email Address") },
+                        value = joinCode,
+                        onValueChange = { joinCode = it.uppercase() },
+                        label = { Text("Invite code") },
                         singleLine = true,
-                        placeholder = { Text("e.g. name@gmail.com") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                        )
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    emailErr?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
-                    }
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        val trimmed = emailInput.trim()
-                        if (trimmed.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(trimmed).matches()) {
-                            emailErr = "Please enter a valid email."
-                        } else {
-                            syncManager.setUserEmail(trimmed)
-                            showGoogleAuthDialog = false
-                        }
-                    }
-                ) {
-                    Text("Sign In")
-                }
+                Button(onClick = {
+                    viewModel.joinCellar(joinCode)
+                    showJoin = false
+                    joinCode = ""
+                }) { Text("Join") }
             },
-            dismissButton = {
-                TextButton(onClick = { showGoogleAuthDialog = false }) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(16.dp)
+            dismissButton = { TextButton(onClick = { showJoin = false }) { Text("Cancel") } }
         )
+    }
+
+    if (confirmSignOut) {
+        AlertDialog(
+            onDismissRequest = { confirmSignOut = false },
+            title = { Text("Sign out?") },
+            text = { Text("Your cellar stays safe in the cloud. Sign back in with the same email to see it again.") },
+            confirmButton = {
+                Button(onClick = {
+                    confirmSignOut = false
+                    viewModel.signOut()
+                }) { Text("Sign out") }
+            },
+            dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text("Cancel") } }
+        )
+    }
+}
+
+@Composable
+private fun SettingsCard(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+            }
+            content()
+        }
+    }
+}
+
+@Composable
+private fun CopyableValue(label: String, value: String, onCopy: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(10.dp))
+            .padding(start = 10.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+            SelectionContainer {
+                Text(value, style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace))
+            }
+        }
+        IconButton(onClick = onCopy) {
+            Icon(Icons.Rounded.ContentCopy, contentDescription = "Copy $label")
+        }
     }
 }

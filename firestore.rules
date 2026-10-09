@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// Paste this whole file into Firebase console → Firestore Database → Rules → Publish.
+// Only signed-in members of a cellar can see or change it.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function cellarData(cellarId) {
+      return get(/databases/$(database)/documents/cellars/$(cellarId)).data;
+    }
+
+    function isMember(cellarId) {
+      return signedIn() && request.auth.uid in cellarData(cellarId).members;
+    }
+
+    // Someone with a valid, unexpired invite code may add themselves (and only themselves).
+    function isJoiningWithInvite(cellarId) {
+      let code = request.resource.data.lastJoinCode;
+      let invite = get(/databases/$(database)/documents/invites/$(code)).data;
+      return signedIn()
+        && invite.cellarId == cellarId
+        && invite.expiresAt > request.time
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['members', 'memberEmails', 'lastJoinCode'])
+        && request.resource.data.members.toSet()
+             == resource.data.members.toSet().union([request.auth.uid].toSet());
+    }
+
+    // Each account can only read and write its own profile (which cellar it uses).
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /cellars/{cellarId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.members == [request.auth.uid];
+      allow update: if (signedIn()
+          && request.auth.uid in resource.data.members
+          && request.resource.data.ownerUid == resource.data.ownerUid)
+        || isJoiningWithInvite(cellarId);
+      allow delete: if false;
+
+      match /bottles/{bottleId} {
+        allow read, write: if isMember(cellarId);
+      }
+
+      match /photos/{photoId} {
+        allow read, write: if isMember(cellarId);
+      }
+
+      // Readings from the ESP32. It has no account; it proves itself with the cellar's sensor key.
+      match /climate/{readingId} {
+        allow read: if isMember(cellarId);
+        allow create: if request.resource.data.keys().hasOnly(['temperature', 'humidity', 'ts', 'sensorKey'])
+          && request.resource.data.sensorKey == cellarData(cellarId).sensorKey
+          && request.resource.data.temperature is number
+          && request.resource.data.humidity is number
+          && request.resource.data.ts is timestamp;
+        allow delete: if isMember(cellarId);
+        allow update: if false;
+      }
+    }
+
+    // TEMPORARY: lets the new app copy in bottles saved by the old version's cloud sync
+    // (cellars/cellar_<name>/bottles). Read-only. Delete this block once everyone has imported.
+    match /cellars/{legacyId}/bottles/{bottleId} {
+      allow read: if signedIn() && legacyId.matches('cellar_.*');
+    }
+
+    match /invites/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && isMember(request.resource.data.cellarId);
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.createdBy == request.auth.uid;
+    }
+  }
+}

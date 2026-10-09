@@ -1,21 +1,47 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Wine Cellar
 
-# Run and deploy your AI Studio app
+Android app for tracking a wine rack (18 × 10 slots), shared between phones, with live
+temperature/humidity from an ESP32 sensor.
 
-This contains everything you need to run your app locally.
+## Version 2.0 changes
+- **Sync rebuilt.** Firestore is now the single source of truth (with its built-in offline cache).
+  Every bottle has its own permanent ID, so edits, moves, swaps and deletes sync correctly and
+  can't be undone or duplicated by another phone.
+- **Real accounts.** Firebase email + password sign-in. A cellar is shared with people you invite
+  using a 6-character code (Settings → Shared cellar). Firestore rules lock each cellar to its members.
+- **Import from version 1.** On first sign-in, "Create cellar & import my bottles" copies the old
+  on-phone database (and the old cloud copy, if any) into the new cellar, including photos.
+  The old data is never deleted; a backup copy is kept in the app's private folder.
+- **Photos.** Full-resolution camera or gallery photos, rotated correctly, compressed and stored in
+  Firestore so they appear on every phone (no paid Firebase plan needed).
+- **Real sensor + alerts.** The ESP32 sketch in `firmware/` writes readings to the cloud. The Climate
+  tab shows live data and history; optional notifications when the cellar goes above your limit.
+- **Fixes.** Two bottles can no longer share a slot, deleting asks for confirmation, settings are saved,
+  demo bottles and simulated readings are gone, and the 2,600-line inventory screen is split up.
 
-View your app in AI Studio: https://ai.studio/apps/6169a34f-cac0-4b0e-a4b5-ae73a9593dce
+## One-time Firebase setup (do this before installing 2.0)
+1. Firebase console → **Authentication** → Get started → **Sign-in method** → **Email/Password** → Enable → Save.
+2. Firebase console → **Firestore Database** → **Rules** → replace everything with the contents of
+   [`firestore.rules`](firestore.rules) → **Publish**.
 
-## Run Locally
+## Building the APK
+Pushing to `main` runs `.github/workflows/main.yml`, which builds the debug APK and publishes it on the
+**Releases** page. Builds are signed with the key in `debug.keystore.base64`, the same key as earlier
+builds, so a new APK installs as an update and keeps the phone's data. **Don't uninstall the old app first.**
 
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+If a `.zip` of the project is uploaded to the repo root, the workflow unpacks it over the repo,
+commits the result and then builds.
 
+## Sensor
+See `firmware/esp32_cellar_sensor/esp32_cellar_sensor.ino`. The cellar ID and sensor key it needs are
+shown in the app under Settings → Temperature sensor.
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+## Data layout (Firestore)
+```
+users/{uid}                       email, cellarId
+cellars/{cellarId}                name, ownerUid, members[], memberEmails[], sensorKey, alertThreshold
+cellars/{cellarId}/bottles/{id}   one document per bottle
+cellars/{cellarId}/photos/{id}    full-size photo for bottle {id}
+cellars/{cellarId}/climate/{id}   temperature, humidity, ts (from the ESP32)
+invites/{code}                    cellarId, createdBy, expiresAt
+```

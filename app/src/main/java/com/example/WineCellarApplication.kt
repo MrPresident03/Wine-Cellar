@@ -1,16 +1,14 @@
 package com.example
 
 import android.app.Application
-import com.example.data.WineCellarDatabase
-import com.example.data.WineCellarRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
+import com.example.alerts.Notifications
+import com.google.firebase.FirebaseApp
 
 class WineCellarApplication : Application() {
-    // No DI framework needed, we use simple manual dependency injection.
-    private val applicationScope = CoroutineScope(SupervisorJob())
-
-    val database by lazy { WineCellarDatabase.getDatabase(this, applicationScope) }
-    val repository by lazy { WineCellarRepository(database.wineCellarDao()) }
-    val syncManager by lazy { com.example.data.FirebaseSyncManager(this, repository, applicationScope) }
+    override fun onCreate() {
+        super.onCreate()
+        // Normally done automatically from google-services.json; this is a harmless safety net.
+        FirebaseApp.initializeApp(this)
+        Notifications.createChannel(this)
+    }
 }

@@ -1,54 +1,123 @@
 package com.example
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import android.app.Application
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.data.TemperatureRecord
+import com.example.alerts.ClimateAlertWorker
+import com.example.data.AuthRepository
+import com.example.data.AuthState
+import com.example.data.BottleDraft
+import com.example.data.Cellar
+import com.example.data.CellarLayout
+import com.example.data.CellarRepository
+import com.example.data.ClimateReading
+import com.example.data.LegacyImporter
+import com.example.data.PhotoChange
+import com.example.data.PhotoData
+import com.example.data.PhotoUtils
+import com.example.data.Prefs
+import com.example.data.TimeFilter
+import com.example.data.UserCellarState
 import com.example.data.WineBottle
-import com.example.data.WineCellarRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import kotlinx.coroutines.withContext
 
-enum class TimeFilter {
-    DAY, WEEK, MONTH
-}
+@OptIn(ExperimentalCoroutinesApi::class)
+class WineCellarViewModel(application: Application) : AndroidViewModel(application) {
 
-class WineCellarViewModel(
-    private val repository: WineCellarRepository,
-    val syncManager: com.example.data.FirebaseSyncManager
-) : ViewModel() {
+    private val authRepo = AuthRepository()
+    private val repo = CellarRepository()
+    private val importer = LegacyImporter(application, repo)
+    private val prefs = application.getSharedPreferences(Prefs.NAME, Context.MODE_PRIVATE)
 
-    // Active screen navigation state
+    // ------------------------------------------------------------------ messages (snackbars)
+
+    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val messages: SharedFlow<String> = _messages.asSharedFlow()
+
+    private fun message(text: String) {
+        _messages.tryEmit(text)
+    }
+
+    private val onCloudError: (Exception) -> Unit = { e ->
+        Log.w(TAG, "Cloud write/listen failed", e)
+        message(CellarRepository.friendlyFirestoreError(e))
+    }
+
+    // ------------------------------------------------------------------ auth & cellar
+
+    val authState: StateFlow<AuthState> = authRepo.authState
+        .stateIn(viewModelScope, SharingStarted.Eagerly, AuthState.Loading)
+
+    val userCellar: StateFlow<UserCellarState> = authState
+        .flatMapLatest { state ->
+            if (state is AuthState.SignedIn) repo.observeUserCellar(state.uid) else flowOf(UserCellarState.Loading)
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, UserCellarState.Loading)
+
+    private val cellarId: StateFlow<String?> = userCellar
+        .map { (it as? UserCellarState.Ready)?.cellarId }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val cellar: StateFlow<Cellar?> = cellarId
+        .flatMapLatest { id -> if (id == null) flowOf(null) else repo.observeCellar(id) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val bottles: StateFlow<List<WineBottle>> = cellarId
+        .flatMapLatest { id -> if (id == null) flowOf(emptyList()) else repo.observeBottles(id, onCloudError) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val _busy = MutableStateFlow(false)
+    val busy: StateFlow<Boolean> = _busy.asStateFlow()
+
     private val _activeTab = MutableStateFlow(0)
     val activeTab: StateFlow<Int> = _activeTab.asStateFlow()
 
-    // Database of wine bottles
-    val bottlesState: StateFlow<List<WineBottle>> = repository.allBottles
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    fun selectTab(index: Int) {
+        _activeTab.value = index
+    }
 
-    // Search query state
+    private val _inviteCode = MutableStateFlow<String?>(null)
+    val inviteCode: StateFlow<String?> = _inviteCode.asStateFlow()
+
+    // ------------------------------------------------------------------ search & filters
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    // Additional Filter states
     private val _agingFilter = MutableStateFlow("All")
     val agingFilter: StateFlow<String> = _agingFilter.asStateFlow()
 
     private val _varietalFilter = MutableStateFlow("All")
     val varietalFilter: StateFlow<String> = _varietalFilter.asStateFlow()
 
-    private val _sortBy = MutableStateFlow("Varietal (A-Z)")
+    private val _sortBy = MutableStateFlow(DEFAULT_SORT)
     val sortBy: StateFlow<String> = _sortBy.asStateFlow()
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
 
     fun setAgingFilter(filter: String) {
         _agingFilter.value = filter
@@ -62,264 +131,350 @@ class WineCellarViewModel(
         _sortBy.value = sort
     }
 
-    // Filtered list of bottles
-    val filteredBottlesState: StateFlow<List<WineBottle>> = combine(
-        bottlesState,
-        _searchQuery,
-        _agingFilter,
-        _varietalFilter,
-        _sortBy
-    ) { bottles, query, aging, varietalOpt, sortOpt ->
-        var result = bottles
-
-        // 1. Text Search query filter
+    val filteredBottles: StateFlow<List<WineBottle>> = combine(
+        bottles, _searchQuery, _agingFilter, _varietalFilter, _sortBy
+    ) { all, query, aging, varietal, sort ->
+        var result = all
         if (query.isNotBlank()) {
             result = result.filter {
                 it.wineryName.contains(query, ignoreCase = true) ||
-                it.varietal.contains(query, ignoreCase = true) ||
-                it.vintage.contains(query, ignoreCase = true) ||
-                (it.classification?.contains(query, ignoreCase = true) == true)
+                    it.varietal.contains(query, ignoreCase = true) ||
+                    it.vintage.contains(query, ignoreCase = true) ||
+                    (it.classification?.contains(query, ignoreCase = true) == true)
             }
         }
-
-        // 2. Aging filter
         result = when (aging) {
             "Aging Only" -> result.filter { it.isAging }
             "Ready (Not Aging)" -> result.filter { !it.isAging }
             else -> result
         }
-
-        // 3. Varietal optional filter
-        if (varietalOpt != "All") {
-            result = result.filter { it.varietal.equals(varietalOpt, ignoreCase = true) }
+        if (varietal != "All") {
+            // "Syrah / Shiraz" matches either name, so older entries like "Shiraz" still show up.
+            val names = varietal.split("/").map { it.trim() }.filter { it.isNotEmpty() }
+            result = result.filter { b -> names.any { n -> b.varietal.contains(n, ignoreCase = true) } }
         }
+        sortBottles(result, sort)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-        // 4. Sorting
-        result = when (sortOpt) {
-            "Winery (A-Z)" -> result.sortedBy { it.wineryName }
-            "Vintage (Newest)" -> result.sortedByDescending { it.vintage.toIntOrNull() ?: 0 }
-            "Vintage (Oldest)" -> result.sortedBy { it.vintage.toIntOrNull() ?: 9999 }
-            "Price (Highest)" -> result.sortedByDescending { it.price ?: 0.0 }
-            "Price (Lowest)" -> result.sortedBy { it.price ?: 999999.0 }
-            else -> result.sortedWith(compareBy<WineBottle> { it.varietal }.thenByDescending { it.vintage })
-        }
+    // ------------------------------------------------------------------ climate
 
-        result
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    // Combined temperature logs
-    val temperatureRecordsState: StateFlow<List<TemperatureRecord>> = repository.allTemperatureRecords
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-
-    // Selected chart log filter
     private val _timeFilter = MutableStateFlow(TimeFilter.WEEK)
     val timeFilter: StateFlow<TimeFilter> = _timeFilter.asStateFlow()
-
-    // Filtered temperature points based on Selection
-    val filteredHistoryState: StateFlow<List<TemperatureRecord>> = combine(
-        temperatureRecordsState,
-        _timeFilter
-    ) { records, filter ->
-        if (records.isEmpty()) return@combine emptyList()
-
-        val cutoffTime = when (filter) {
-            TimeFilter.DAY -> System.currentTimeMillis() - 24 * 60 * 60 * 1000
-            TimeFilter.WEEK -> System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000
-            TimeFilter.MONTH -> System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000
-        }
-
-        // Return records within scope, sorted chronologically
-        records.filter { it.timestamp >= cutoffTime }
-            .sortedBy { it.timestamp }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    // Current latest climate reading
-    val currentClimateState: StateFlow<TemperatureRecord?> = temperatureRecordsState
-        .combine(_timeFilter) { records, _ ->
-            // Simply take the latest available reading
-            records.maxByOrNull { it.timestamp }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
-
-    // Microcontroller IP setting (Arduino/ESP8266)
-    private val _microcontrollerIp = MutableStateFlow("192.168.1.145")
-    val microcontrollerIp: StateFlow<String> = _microcontrollerIp.asStateFlow()
-
-    // Microcontroller connection status
-    private val _isMicrocontrollerConnected = MutableStateFlow(true)
-    val isMicrocontrollerConnected: StateFlow<Boolean> = _isMicrocontrollerConnected.asStateFlow()
-
-    // Low power mode state
-    private val _lowPowerModeEnabled = MutableStateFlow(false)
-    val lowPowerModeEnabled: StateFlow<Boolean> = _lowPowerModeEnabled.asStateFlow()
-
-    // Threshold high alert temperature setting
-    private val _alertTempThreshold = MutableStateFlow(18.0f)
-    val alertTempThreshold: StateFlow<Float> = _alertTempThreshold.asStateFlow()
-
-    // Sycn status updates
-    private val _syncing = MutableStateFlow(false)
-    val syncing: StateFlow<Boolean> = _syncing.asStateFlow()
-
-    private val _lastSyncTimestamp = MutableStateFlow(System.currentTimeMillis() - 12 * 60 * 1000) // Default 12 mins ago
-    val lastSyncTimestamp: StateFlow<Long> = _lastSyncTimestamp.asStateFlow()
-
-    // Skipped login flow
-    private val _userSkippedLogin = MutableStateFlow(false)
-    val userSkippedLogin: StateFlow<Boolean> = _userSkippedLogin.asStateFlow()
-
-    fun skipLogin() {
-        _userSkippedLogin.value = true
-    }
-
-    fun logout() {
-        syncManager.setUserEmail("")
-        syncManager.enableFirebase(false)
-        _userSkippedLogin.value = false
-    }
-
-    fun selectTab(tabIndex: Int) {
-        _activeTab.value = tabIndex
-    }
 
     fun setTimeFilter(filter: TimeFilter) {
         _timeFilter.value = filter
     }
 
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
-    }
+    val latestReading: StateFlow<ClimateReading?> = cellarId
+        .flatMapLatest { id -> if (id == null) flowOf(null) else repo.observeLatestReading(id) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun setMicrocontrollerIp(ip: String) {
-        _microcontrollerIp.value = ip
-    }
-
-    fun toggleLowPowerMode(enabled: Boolean) {
-        _lowPowerModeEnabled.value = enabled
-    }
-
-    fun setAlertThreshold(threshold: Float) {
-        _alertTempThreshold.value = threshold
-    }
-
-    // Trigger Wi-Fi microcontroller sync
-    fun triggerWifiSync() {
-        if (_syncing.value) return
-        viewModelScope.launch {
-            _syncing.value = true
-            // Simulate a brief wifi roundtrip delay of 800ms
-            kotlinx.coroutines.delay(800)
-
-            // Sync from repository with slight mock noise around cellar targets
-            repository.syncMicrocontroller(targetTemp = 13.5f, baseHumidity = 67.5f)
-
-            _isMicrocontrollerConnected.value = true
-            _lastSyncTimestamp.value = System.currentTimeMillis()
-            _syncing.value = false
-        }
-    }
-
-    // Manage Bottles
-    fun addBottle(winery: String, classification: String?, varietal: String, vintage: String, row: Int, col: Int, photoUri: String? = null, price: Double? = null, isAging: Boolean = false) {
-        viewModelScope.launch {
-            val bottle = WineBottle(
-                wineryName = winery.trim(),
-                classification = classification?.trim()?.ifBlank { null },
-                varietal = varietal.trim(),
-                vintage = vintage.trim(),
-                gridRow = row,
-                gridCol = col,
-                photoUri = photoUri,
-                price = price,
-                isAging = isAging
-            )
-            repository.insertBottle(bottle)
-        }
-    }
-
-    fun updateBottleLocation(bottle: WineBottle, newRow: Int, newCol: Int) {
-        viewModelScope.launch {
-            val existingAtTarget = bottlesState.value.firstOrNull { it.gridRow == newRow && it.gridCol == newCol }
-            if (existingAtTarget != null) {
-                // Swap locations! Move existing bottle to the old bottle's location
-                repository.insertBottle(existingAtTarget.copy(gridRow = bottle.gridRow, gridCol = bottle.gridCol))
+    val history: StateFlow<List<ClimateReading>> = combine(cellarId, _timeFilter) { id, filter -> Pair(id, filter) }
+        .flatMapLatest { pair ->
+            val id = pair.first
+            val filter = pair.second
+            if (id == null) {
+                flowOf(emptyList())
+            } else {
+                repo.observeHistory(id, System.currentTimeMillis() - filter.millis).map { downsample(it, 300) }
             }
-            // Move the selected bottle to the new location
-            repository.insertBottle(bottle.copy(gridRow = newRow, gridCol = newCol))
         }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val _alertsEnabled = MutableStateFlow(prefs.getBoolean(Prefs.ALERTS_ENABLED, false))
+    val alertsEnabled: StateFlow<Boolean> = _alertsEnabled.asStateFlow()
+
+    fun setAlertsEnabled(enabled: Boolean) {
+        _alertsEnabled.value = enabled
+        prefs.edit()
+            .putBoolean(Prefs.ALERTS_ENABLED, enabled)
+            .putBoolean(Prefs.ALERT_ACTIVE, false)
+            .apply()
+        val app = getApplication<Application>()
+        if (enabled) ClimateAlertWorker.schedule(app) else ClimateAlertWorker.cancel(app)
     }
 
-    fun updateBottle(bottle: WineBottle) {
-        viewModelScope.launch {
-            repository.insertBottle(bottle)
-        }
+    fun setAlertThreshold(value: Double) {
+        val id = cellarId.value ?: return
+        val rounded = Math.round(value * 2) / 2.0
+        repo.updateCellarFields(id, mapOf("alertThreshold" to rounded), onCloudError)
+        prefs.edit().putBoolean(Prefs.ALERT_ACTIVE, false).apply()
     }
 
-    fun duplicateBottleToNextColumn(bottle: WineBottle) {
+    // ------------------------------------------------------------------ version 1 import
+
+    private val _legacyCount = MutableStateFlow(0)
+    val legacyCount: StateFlow<Int> = _legacyCount.asStateFlow()
+
+    private val _importing = MutableStateFlow(false)
+    val importing: StateFlow<Boolean> = _importing.asStateFlow()
+
+    private val _importResult = MutableStateFlow<String?>(null)
+    val importResult: StateFlow<String?> = _importResult.asStateFlow()
+
+    fun dismissImportResult() {
+        _importResult.value = null
+    }
+
+    fun importLegacy() {
+        val id = cellarId.value ?: return
+        val state = authState.value as? AuthState.SignedIn ?: return
+        launchImport(id, state, manual = true)
+    }
+
+    private fun launchImport(id: String, state: AuthState.SignedIn, manual: Boolean) {
+        if (_importing.value) return
+        _importing.value = true
         viewModelScope.launch {
-            val all = bottlesState.value
-            var targetCol = bottle.gridCol + 1
-            var targetRow = bottle.gridRow
-            
-            // Loop sequentially across columns and then rows to find the next empty slot
-            var found = false
-            while (targetRow <= 18) {
-                while (targetCol <= 10) {
-                    val occupied = all.any { it.gridRow == targetRow && it.gridCol == targetCol }
-                    if (!occupied) {
-                        found = true
-                        break
+            try {
+                val r = importer.importInto(id, state.uid, state.email)
+                val found = r.imported > 0 || r.alreadyInCellar > 0
+                if (found || manual) {
+                    val sb = StringBuilder()
+                    if (!found) {
+                        sb.append("No bottles from the previous version were found on this phone.")
+                    } else {
+                        sb.append("Imported ${r.imported} bottle")
+                        if (r.imported != 1) sb.append("s")
+                        if (r.photos > 0) sb.append(" (with ${r.photos} photo${if (r.photos == 1) "" else "s"})")
+                        sb.append(" from the previous version of the app.")
+                        if (r.alreadyInCellar > 0) {
+                            sb.append(" ${r.alreadyInCellar} were already in this cellar, so they were skipped.")
+                        }
+                        if (r.stillUploading) {
+                            sb.append(" Some are still uploading and will reach other phones once this one is online.")
+                        }
                     }
-                    targetCol++
+                    _importResult.value = sb.toString()
                 }
-                if (found) break
-                targetRow++
-                targetCol = 1 // reset to first column
-            }
-            
-            if (found) {
-                val newBottle = bottle.copy(
-                    id = 0, // safe auto-generate id
-                    gridRow = targetRow,
-                    gridCol = targetCol,
-                    timestamp = System.currentTimeMillis()
-                )
-                repository.insertBottle(newBottle)
+            } catch (e: Exception) {
+                Log.w(TAG, "Import failed", e)
+                _importResult.value = "The import didn't finish: ${CellarRepository.friendlyFirestoreError(e)}\n\n" +
+                    "Your old data is untouched on this phone. You can run the import again from Settings."
+            } finally {
+                _importing.value = false
             }
         }
+    }
+
+    init {
+        viewModelScope.launch {
+            _legacyCount.value = withContext(Dispatchers.IO) {
+                if (importer.hasLocalData()) importer.readLocal().size else 0
+            }
+        }
+        if (_alertsEnabled.value) ClimateAlertWorker.schedule(application)
+    }
+
+    // ------------------------------------------------------------------ sign in / out
+
+    fun signIn(email: String, password: String) {
+        authAction { authRepo.signIn(email.trim(), password) }
+    }
+
+    fun signUp(email: String, password: String) {
+        authAction { authRepo.signUp(email.trim(), password) }
+    }
+
+    fun resetPassword(email: String) {
+        authAction {
+            authRepo.resetPassword(email.trim())
+            message("Password reset email sent to ${email.trim()}")
+        }
+    }
+
+    private fun authAction(block: suspend () -> Unit) {
+        if (_busy.value) return
+        viewModelScope.launch {
+            _busy.value = true
+            try {
+                block()
+            } catch (e: Exception) {
+                message(AuthRepository.friendlyError(e))
+            } finally {
+                _busy.value = false
+            }
+        }
+    }
+
+    fun signOut() {
+        authRepo.signOut()
+        _inviteCode.value = null
+        _activeTab.value = 0
+        _searchQuery.value = ""
+    }
+
+    // ------------------------------------------------------------------ cellar setup & sharing
+
+    /** Creates a new cellar for this account and copies in the bottles from version 1. */
+    fun createCellar() {
+        val state = authState.value as? AuthState.SignedIn ?: return
+        if (_busy.value) return
+        viewModelScope.launch {
+            _busy.value = true
+            try {
+                val name = importer.legacyCellarName() ?: "My Cellar"
+                val id = repo.createCellar(state.uid, state.email, name)
+                launchImport(id, state, manual = false)
+            } catch (e: Exception) {
+                message(CellarRepository.friendlyFirestoreError(e))
+            } finally {
+                _busy.value = false
+            }
+        }
+    }
+
+    fun joinCellar(code: String) {
+        val state = authState.value as? AuthState.SignedIn ?: return
+        if (_busy.value) return
+        viewModelScope.launch {
+            _busy.value = true
+            try {
+                repo.joinCellar(state.uid, state.email, code)
+                _inviteCode.value = null
+                message("You've joined the cellar.")
+            } catch (e: IllegalArgumentException) {
+                message(e.message ?: "That invite code didn't work.")
+            } catch (e: Exception) {
+                message(CellarRepository.friendlyFirestoreError(e))
+            } finally {
+                _busy.value = false
+            }
+        }
+    }
+
+    fun createInvite() {
+        val id = cellarId.value ?: return
+        val state = authState.value as? AuthState.SignedIn ?: return
+        if (_busy.value) return
+        viewModelScope.launch {
+            _busy.value = true
+            try {
+                _inviteCode.value = repo.createInvite(state.uid, id)
+            } catch (e: Exception) {
+                message(CellarRepository.friendlyFirestoreError(e))
+            } finally {
+                _busy.value = false
+            }
+        }
+    }
+
+    fun renameCellar(name: String) {
+        val id = cellarId.value ?: return
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return
+        repo.updateCellarFields(id, mapOf("name" to trimmed), onCloudError)
+    }
+
+    // ------------------------------------------------------------------ bottles
+
+    private fun ids(): Pair<String, String>? {
+        val id = cellarId.value ?: return null
+        val state = authState.value as? AuthState.SignedIn ?: return null
+        return Pair(id, state.uid)
+    }
+
+    fun bottleAt(row: Int, col: Int, exceptId: String? = null): WineBottle? =
+        bottles.value.firstOrNull { it.gridRow == row && it.gridCol == col && it.id != exceptId }
+
+    fun addBottle(draft: BottleDraft, photo: PhotoData?) {
+        val pair = ids() ?: return
+        repo.addBottle(pair.first, pair.second, draft, photo, onCloudError)
+    }
+
+    fun updateBottle(bottleId: String, draft: BottleDraft, change: PhotoChange) {
+        val pair = ids() ?: return
+        repo.updateBottle(pair.first, pair.second, bottleId, draft, change, onCloudError)
+    }
+
+    /** Moves a bottle; if the target slot is taken the two bottles swap places in one write. */
+    fun moveBottle(bottle: WineBottle, row: Int, col: Int) {
+        val pair = ids() ?: return
+        if (bottle.gridRow == row && bottle.gridCol == col) return
+        val occupant = bottleAt(row, col, exceptId = bottle.id)
+        repo.moveBottle(pair.first, pair.second, bottle, row, col, occupant, onCloudError)
+    }
+
+    fun duplicateToNextFreeSlot(bottle: WineBottle) {
+        val pair = ids() ?: return
+        val slot = nextFreeSlot(bottle.gridRow, bottle.gridCol)
+        if (slot == null) {
+            message("There are no free slots left in the rack.")
+            return
+        }
+        viewModelScope.launch {
+            repo.duplicateBottle(pair.first, pair.second, bottle, slot.first, slot.second, onCloudError)
+            message("Copied to row ${slot.first}, column ${slot.second}.")
+        }
+    }
+
+    private fun nextFreeSlot(fromRow: Int, fromCol: Int): Pair<Int, Int>? {
+        val taken = bottles.value.map { Pair(it.gridRow, it.gridCol) }.toSet()
+        val total = CellarLayout.ROWS * CellarLayout.COLS
+        val start = (fromRow - 1) * CellarLayout.COLS + (fromCol - 1)
+        for (step in 1 until total) {
+            val index = (start + step) % total
+            val slot = Pair(index / CellarLayout.COLS + 1, index % CellarLayout.COLS + 1)
+            if (slot !in taken) return slot
+        }
+        return null
     }
 
     fun deleteBottle(bottle: WineBottle) {
-        viewModelScope.launch {
-            repository.deleteBottle(bottle)
-        }
+        val pair = ids() ?: return
+        repo.deleteBottle(pair.first, bottle.id, onCloudError)
     }
-}
 
-class WineCellarViewModelFactory(
-    private val repository: WineCellarRepository,
-    private val syncManager: com.example.data.FirebaseSyncManager
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(WineCellarViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return WineCellarViewModel(repository, syncManager) as T
+    // ------------------------------------------------------------------ photos
+
+    suspend fun processPhoto(uri: Uri): PhotoData? = withContext(Dispatchers.IO) {
+        PhotoUtils.fromUri(getApplication<Application>(), uri)
+    }
+
+    suspend fun loadFullPhoto(bottleId: String): ImageBitmap? {
+        val id = cellarId.value ?: return null
+        val data: String = try {
+            repo.getPhoto(id, bottleId)
+        } catch (e: Exception) {
+            null
+        } ?: return null
+        return withContext(Dispatchers.Default) { PhotoUtils.decode(data)?.asImageBitmap() }
+    }
+
+    companion object {
+        private const val TAG = "WineCellarViewModel"
+        const val DEFAULT_SORT = "Varietal (A-Z)"
+        val SORT_OPTIONS = listOf(
+            "Varietal (A-Z)",
+            "Winery (A-Z)",
+            "Vintage (Newest)",
+            "Vintage (Oldest)",
+            "Price (Highest)",
+            "Price (Lowest)",
+            "Rack Slot"
+        )
+
+        fun sortBottles(list: List<WineBottle>, sort: String): List<WineBottle> = when (sort) {
+            "Winery (A-Z)" -> list.sortedBy { it.wineryName.lowercase() }
+            "Vintage (Newest)" -> list.sortedByDescending { it.vintage.toIntOrNull() ?: 0 }
+            "Vintage (Oldest)" -> list.sortedBy { it.vintage.toIntOrNull() ?: 9999 }
+            "Price (Highest)" -> list.sortedByDescending { it.price ?: 0.0 }
+            "Price (Lowest)" -> list.sortedBy { it.price ?: Double.MAX_VALUE }
+            "Rack Slot" -> list.sortedWith(compareBy<WineBottle> { it.gridRow }.thenBy { it.gridCol })
+            else -> list.sortedWith(compareBy<WineBottle> { it.varietal.lowercase() }.thenByDescending { it.vintage })
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
+
+        /** Averages readings into at most [maxPoints] buckets so long ranges still draw quickly. */
+        fun downsample(readings: List<ClimateReading>, maxPoints: Int): List<ClimateReading> {
+            if (readings.size <= maxPoints) return readings
+            val bucket = (readings.size + maxPoints - 1) / maxPoints
+            return readings.chunked(bucket).map { chunk ->
+                ClimateReading(
+                    timestamp = chunk[chunk.size / 2].timestamp,
+                    temperature = chunk.map { it.temperature }.average().toFloat(),
+                    humidity = chunk.map { it.humidity }.average().toFloat()
+                )
+            }
+        }
     }
 }
