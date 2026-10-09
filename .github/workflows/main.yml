@@ -1,0 +1,16 @@
+{
+  "name": "Build APK",
+  "on": {"push": {"branches": ["main", "master"]}, "workflow_dispatch": {}},
+  "permissions": {"contents": "write"},
+  "concurrency": {"group": "build-apk", "cancel-in-progress": true},
+  "jobs": { "build": { "runs-on": "ubuntu-latest", "timeout-minutes": 40, "steps": [
+    {"uses": "actions/checkout@v5"},
+    {"name": "Apply uploaded project zip", "run": "set -e\nZ=\"$(find . -maxdepth 1 -name '*.zip' | head -1)\"\nif [ -z \"$Z\" ]; then echo \"No update zip found, building the repo as it is.\"; exit 0; fi\necho \"Applying $Z\"\nrm -rf /tmp/update && mkdir -p /tmp/update && unzip -o -q \"$Z\" -d /tmp/update\nS=\"$(find /tmp/update -name settings.gradle.kts -not -path '*/__MACOSX/*' | head -1)\"\nif [ -z \"$S\" ]; then echo \"No Gradle project inside $Z\"; exit 1; fi\nR=\"$(dirname \"$S\")\"\nrm -rf \"$R/.github\"\ngit ls-files -z | grep -zv '^\\.github/' | xargs -0 -r git rm -q --\ncp -a \"$R\"/. .\ngit add -A\ngit -c user.name=\"github-actions[bot]\" -c user.email=\"41898713+github-actions[bot]@users.noreply.github.com\" commit -q -m \"Apply update from $Z\"\ngit push origin \"HEAD:$GITHUB_REF_NAME\"\necho \"Update applied and committed.\""},
+    {"uses": "actions/setup-java@v5", "with": {"distribution": "temurin", "java-version": "17"}},
+    {"uses": "gradle/actions/setup-gradle@v4", "with": {"gradle-version": "9.3.1"}},
+    {"name": "Build debug APK", "timeout-minutes": 30, "run": "if [ -f debug.keystore.base64 ]; then base64 -d debug.keystore.base64 > debug.keystore; fi\ngradle assembleDebug --stacktrace --no-configuration-cache -Pkotlin.compiler.execution.strategy=in-process \"-Dorg.gradle.jvmargs=-Xmx5g -Dfile.encoding=UTF-8\""},
+    {"name": "Name the APK", "run": "cp app/build/outputs/apk/debug/app-debug.apk WineCellar-${{ github.run_number }}.apk"},
+    {"uses": "actions/upload-artifact@v4", "with": {"name": "WineCellar-apk", "path": "WineCellar-*.apk"}},
+    {"name": "Publish release", "uses": "softprops/action-gh-release@v2", "with": {"tag_name": "build-${{ github.run_number }}", "name": "Wine Cellar build ${{ github.run_number }}", "files": "WineCellar-${{ github.run_number }}.apk", "make_latest": "true"}}
+  ] } }
+}
