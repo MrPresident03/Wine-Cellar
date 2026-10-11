@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -65,6 +66,8 @@ fun SettingsScreen(viewModel: WineCellarViewModel) {
     val busy by viewModel.busy.collectAsState()
     val legacyCount by viewModel.legacyCount.collectAsState()
     val importing by viewModel.importing.collectAsState()
+    val diagnostics by viewModel.diagnostics.collectAsState()
+    var oldEmail by remember { mutableStateOf("") }
 
     var showJoin by remember { mutableStateOf(false) }
     var joinCode by remember { mutableStateOf("") }
@@ -197,11 +200,62 @@ fun SettingsScreen(viewModel: WineCellarViewModel) {
             }
         }
 
+        // ---------------------------------------------------------------- troubleshooting
+        SettingsCard(title = "Find my old bottles", icon = Icons.Rounded.Build) {
+            Text(
+                "If the import found nothing, type the email you entered in the old app's Google login box, " +
+                    "exactly as you typed it. The old app saved a cloud copy under that name.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            OutlinedTextField(
+                value = oldEmail,
+                onValueChange = { oldEmail = it },
+                label = { Text("Email used in the old app") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { viewModel.importFromOldEmail(oldEmail) },
+                    enabled = !importing && oldEmail.isNotBlank()
+                ) {
+                    Text(if (importing) "Importing…" else "Import from this email")
+                }
+                OutlinedButton(onClick = { viewModel.runDiagnostics(oldEmail) }) {
+                    Text("Diagnostics")
+                }
+            }
+        }
+
         Text(
-            "Wine Cellar 2.0",
+            "Wine Cellar 2.0.1",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
             modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
+
+    val report = diagnostics
+    if (report != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDiagnostics() },
+            title = { Text("Diagnostics") },
+            text = {
+                SelectionContainer {
+                    Text(
+                        report,
+                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = { clipboard.setText(AnnotatedString(report)) }) { Text("Copy") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissDiagnostics() }) { Text("Close") }
+            }
         )
     }
 

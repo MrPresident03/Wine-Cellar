@@ -319,14 +319,18 @@ class CellarRepository {
 
     // ---------------------------------------------------------------- import from version 1
 
-    /** Reads the old per-email cloud copy (cellars/cellar_<name>/bottles). Returns empty if unreadable. */
-    suspend fun legacyCloudBottles(legacyCellarId: String): List<DocumentSnapshot> = try {
-        withTimeoutOrNull(15_000) {
+    /**
+     * Reads the old per-email cloud copy (cellars/cellar_<name>/bottles).
+     * Returns the documents, or an error message if it couldn't be read.
+     */
+    suspend fun legacyCloudBottles(legacyCellarId: String): Pair<List<DocumentSnapshot>, String?> = try {
+        val docs = withTimeoutOrNull(15_000) {
             db.collection("cellars").document(legacyCellarId).collection("bottles").get().await().documents
-        } ?: emptyList()
+        }
+        if (docs == null) Pair(emptyList(), "timed out (no internet?)") else Pair(docs, null)
     } catch (e: Exception) {
         Log.w(TAG, "Couldn't read old cloud data for $legacyCellarId", e)
-        emptyList()
+        Pair(emptyList(), friendlyFirestoreError(e))
     }
 
     /**

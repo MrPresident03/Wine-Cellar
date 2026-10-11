@@ -221,20 +221,53 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
     fun importLegacy() {
         val id = cellarId.value ?: return
         val state = authState.value as? AuthState.SignedIn ?: return
-        launchImport(id, state, manual = true)
+        launchImport(id, state, manual = true, extraEmail = null)
     }
 
-    private fun launchImport(id: String, state: AuthState.SignedIn, manual: Boolean) {
+    /** Imports the old cloud copy saved under the email that was typed into version 1 of the app. */
+    fun importFromOldEmail(oldEmail: String) {
+        val id = cellarId.value ?: return
+        val state = authState.value as? AuthState.SignedIn ?: return
+        if (oldEmail.isBlank()) return
+        launchImport(id, state, manual = true, extraEmail = oldEmail.trim())
+    }
+
+    private val _diagnostics = MutableStateFlow<String?>(null)
+    val diagnostics: StateFlow<String?> = _diagnostics.asStateFlow()
+
+    fun runDiagnostics(oldEmail: String?) {
+        val state = authState.value as? AuthState.SignedIn
+        _diagnostics.value = "Checking…"
+        viewModelScope.launch {
+            _diagnostics.value = try {
+                importer.diagnostics(state?.email, oldEmail?.trim()?.ifBlank { null }) +
+                    "\nSigned in as: " + (state?.email ?: "nobody") +
+                    "\nApp version: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
+            } catch (e: Exception) {
+                "Diagnostics failed: $e"
+            }
+        }
+    }
+
+    fun dismissDiagnostics() {
+        _diagnostics.value = null
+    }
+
+    private fun launchImport(id: String, state: AuthState.SignedIn, manual: Boolean, extraEmail: String?) {
         if (_importing.value) return
         _importing.value = true
         viewModelScope.launch {
             try {
-                val r = importer.importInto(id, state.uid, state.email)
+                val r = importer.importInto(id, state.uid, state.email, extraEmail)
                 val found = r.imported > 0 || r.alreadyInCellar > 0
                 if (found || manual) {
                     val sb = StringBuilder()
                     if (!found) {
-                        sb.append("No bottles from the previous version were found on this phone.")
+                        sb.append("No bottles from the previous version were found.")
+                        if (r.cloudNotes.isNotEmpty()) {
+                            sb.append("\n\nCloud locations checked:\n")
+                            sb.append(r.cloudNotes.joinToString("\n"))
+                        }
                     } else {
                         sb.append("Imported ${r.imported} bottle")
                         if (r.imported != 1) sb.append("s")
@@ -327,7 +360,7 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
             try {
                 val name = importer.legacyCellarName() ?: "My Cellar"
                 val id = repo.createCellar(state.uid, state.email, name)
-                launchImport(id, state, manual = false)
+                launchImport(id, state, manual = false, extraEmail = null)
             } catch (e: Exception) {
                 message(CellarRepository.friendlyFirestoreError(e))
             } finally {
