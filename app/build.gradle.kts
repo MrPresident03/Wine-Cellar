@@ -15,8 +15,8 @@ android {
     applicationId = "com.aistudio.winecellar.vntgrk"
     minSdk = 24
     targetSdk = 36
-    versionCode = 5
-    versionName = "2.0.3"
+    versionCode = 7
+    versionName = "2.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -84,6 +84,7 @@ dependencies {
   implementation(libs.androidx.credentials)
   implementation(libs.androidx.credentials.play.services.auth)
   implementation(libs.googleid)
+  implementation(libs.mlkit.text.recognition)
   implementation(libs.androidx.exifinterface)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -39,6 +39,7 @@ import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Thermostat
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -67,7 +68,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -303,11 +306,12 @@ fun InventoryScreen(viewModel: WineCellarViewModel, modifier: Modifier = Modifie
                         (if (varietalFilter != "All") 1 else 0) +
                         (if (sortBy != WineCellarViewModel.DEFAULT_SORT) 1 else 0)
                     if (active > 0) {
-                        Box(
-                            modifier = Modifier.size(16.dp).background(MaterialTheme.colorScheme.primary, CircleShape),
-                            contentAlignment = Alignment.Center
+                        // Badge is Material's purpose-built counter, so the number sits dead centre.
+                        Badge(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ) {
-                            Text("$active", color = MaterialTheme.colorScheme.onPrimary, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            Text("$active", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -385,6 +389,7 @@ fun InventoryScreen(viewModel: WineCellarViewModel, modifier: Modifier = Modifie
                     value = renameText,
                     onValueChange = { renameText = it },
                     label = { Text("Cellar name") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -510,7 +515,13 @@ private fun RackGrid(
                                                 .background(AlertRed, CircleShape),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text("${inSlot.size}", fontSize = 7.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                            Text(
+                                                "${inSlot.size}",
+                                                fontSize = 7.sp,
+                                                lineHeight = 7.sp,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
                                     }
                                 }

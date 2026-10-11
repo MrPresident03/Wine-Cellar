@@ -42,9 +42,6 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         val cloudNotes: List<String>
     )
 
-    /** Last error from reading the on-phone database, for the diagnostics screen. */
-    @Volatile
-    private var lastLocalError: String? = null
 
     private val dbFile: File get() = context.getDatabasePath(DB_NAME)
 
@@ -98,10 +95,8 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
                     }
                 }
             }
-            lastLocalError = null
         } catch (e: Exception) {
             Log.w(TAG, "Couldn't read the version 1 database", e)
-            lastLocalError = e.toString()
         }
         return out
     }
@@ -149,7 +144,7 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         else -> value
     }
 
-    /** Bottles in users/{uid}/wines (the older AI Studio build), plus a note for diagnostics. */
+    /** Bottles in users/{uid}/wines (the older AI Studio build), plus a short status note. */
     private suspend fun readOldUserWines(uid: String?): Pair<List<LegacyBottle>, String?> {
         if (uid == null) return Pair(emptyList(), null)
         val (docs, error) = repo.oldUserWines(uid)
@@ -228,26 +223,6 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         )
     }
 
-    private fun cacheSummary(): String {
-        val files = cacheFiles()
-        if (files.isEmpty()) return "Older offline copies: none\n"
-        val sb = StringBuilder()
-        for (file in files) {
-            val docs = FirestoreCacheReader.readFile(file)
-            val bottles = docs.count { toLegacyBottle(it) != null }
-            sb.append("Older offline copy ").append(file.name.substringAfter("%5D.").substringBefore(".%28"))
-                .append(": ").append(docs.size).append(" documents, ").append(bottles).append(" look like bottles\n")
-            docs.groupBy { d ->
-                // Replace document ids with * so collections group together
-                d.collection.split("/").mapIndexed { i, part -> if (i % 2 == 1) "*" else part }.joinToString("/")
-            }.forEach { (collection, list) ->
-                val keys = list.flatMap { it.fields.keys }.distinct().take(15).joinToString(",")
-                sb.append("  ").append(collection).append(" x").append(list.size).append(" [").append(keys).append("]\n")
-            }
-        }
-        return sb.toString()
-    }
-
     private fun savedLegacyEmail(): String? =
         context.getSharedPreferences("cellar_sync_prefs", Context.MODE_PRIVATE)
             .getString("user_email", null)
@@ -294,74 +269,14 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         return Pair(out, notes)
     }
 
-    /** A plain-text report of where version 1 data could be, for troubleshooting. */
-    suspend fun diagnostics(currentEmail: String?, extraEmail: String?, uid: String?): String = withContext(Dispatchers.IO) {
-        val sb = StringBuilder()
-        sb.append("App: ").append(context.packageName).append('\n')
-        val dbDir = dbFile.parentFile
-        val dbFiles = dbDir?.listFiles()?.joinToString { "${it.name} (${it.length()} B)" }
-        sb.append("databases: ").append(if (dbFiles.isNullOrEmpty()) "none" else dbFiles).append('\n')
-        val prefsDir = File(context.applicationInfo.dataDir, "shared_prefs")
-        val prefs = prefsDir.listFiles()?.joinToString { it.name }
-        sb.append("shared_prefs: ").append(if (prefs.isNullOrEmpty()) "none" else prefs).append('\n')
-        sb.append("Old app saved email: ").append(savedLegacyEmail() ?: "none").append('\n')
-        sb.append("Old app cellar name: ").append(legacyCellarName() ?: "none").append('\n')
-        if (dbFile.exists()) {
-            sb.append("Old database tables: ").append(tableSummary()).append('\n')
-        }
-        val local = readLocal()
-        sb.append("Old database bottles: ").append(local.size)
-        lastLocalError?.let { sb.append(" (error: ").append(it).append(')') }
-        sb.append('\n')
-        val backup = File(context.filesDir, "v1_backup").listFiles()?.joinToString { "${it.name} (${it.length()} B)" }
-        sb.append("Backup copy: ").append(if (backup.isNullOrEmpty()) "none" else backup).append('\n')
-        sb.append(cacheSummary())
-        readOldUserWines(uid).second?.let { sb.append("Cloud ").append(it).append('\n') }
-        val (_, notes) = readCloud(listOf(savedLegacyEmail(), currentEmail, extraEmail))
-        if (notes.isEmpty()) sb.append("Old cloud copy: no email to look up\n")
-        notes.forEach { sb.append("Old cloud ").append(it).append('\n') }
-        sb.toString().trim()
-    }
-
-    private fun tableSummary(): String = try {
-        SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
-            val tables = mutableListOf<String>()
-            db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null).use { c ->
-                while (c.moveToNext()) tables += c.getString(0)
-            }
-            val seq = try {
-                db.rawQuery("SELECT name, seq FROM sqlite_sequence", null).use { c ->
-                    val parts = mutableListOf<String>()
-                    while (c.moveToNext()) parts += c.getString(0) + " last id " + c.getLong(1)
-                    parts.joinToString()
-                }
-            } catch (e: Exception) {
-                "?"
-            }
-            "(" + seq + ") " + tables.joinToString { t ->
-                val count = try {
-                    db.rawQuery("SELECT COUNT(*) FROM \"" + t.replace("\"", "") + "\"", null).use { c ->
-                        if (c.moveToFirst()) c.getLong(0).toString() else "?"
-                    }
-                } catch (e: Exception) {
-                    "?"
-                }
-                "$t=$count"
-            }
-        }
-    } catch (e: Exception) {
-        "couldn't open (${e.message})"
-    }
-
     suspend fun importInto(
         cellarId: String,
         uid: String,
-        email: String?,
-        extraEmail: String? = null
+        email: String?
     ): Result = withContext(Dispatchers.IO) {
         val (userWines, userWinesNote) = readOldUserWines(uid)
         val local = userWines + readOfflineCaches() + readLocal()
-        val (legacyCloud, legacyNotes) = readCloud(listOf(savedLegacyEmail(), email, extraEmail))
+        val (legacyCloud, legacyNotes) = readCloud(listOf(savedLegacyEmail(), email))
         val cloud = legacyCloud
         val cloudNotes = listOfNotNull(userWinesNote) + legacyNotes
 

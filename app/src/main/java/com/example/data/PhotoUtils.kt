@@ -23,14 +23,17 @@ object PhotoUtils {
 
     /** Reads a photo from the camera or gallery, fixes its rotation and compresses it. Run off the main thread. */
     fun fromUri(context: Context, uri: Uri): PhotoData? = try {
-        val bitmap = decodeSampled(context, uri, FULL_MAX_PX)
-        if (bitmap == null) {
-            null
-        } else {
-            fromBitmap(rotateIfNeeded(context, uri, bitmap))
-        }
+        loadBitmap(context, uri, FULL_MAX_PX)?.let { fromBitmap(it) }
     } catch (e: Exception) {
         Log.w(TAG, "Couldn't process photo $uri", e)
+        null
+    }
+
+    /** Loads a photo at up to [maxPx] on its longest side, the right way up. Run off the main thread. */
+    fun loadBitmap(context: Context, uri: Uri, maxPx: Int): Bitmap? = try {
+        decodeSampled(context, uri, maxPx)?.let { rotateIfNeeded(context, uri, it) }
+    } catch (e: Exception) {
+        Log.w(TAG, "Couldn't load photo $uri", e)
         null
     }
 

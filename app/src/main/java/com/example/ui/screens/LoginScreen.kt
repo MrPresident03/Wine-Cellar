@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -293,6 +294,7 @@ fun CellarSetupScreen(viewModel: WineCellarViewModel) {
                     value = code,
                     onValueChange = { code = it.uppercase() },
                     label = { Text("Invite code") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

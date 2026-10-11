@@ -16,6 +16,10 @@ temperature/humidity from an ESP32 sensor.
   Firestore so they appear on every phone (no paid Firebase plan needed).
 - **Real sensor + alerts.** The ESP32 sketch in `firmware/` writes readings to the cloud. The Climate
   tab shows live data and history; optional notifications when the cellar goes above your limit.
+- **Label scanning.** "Scan label" in the add/edit form photographs the front label, reads it on the
+  phone with Google ML Kit (offline) and fills in winery, vintage, varietal and classification, plus the photo.
+- **Several bottles at once.** Set "Number of bottles" when storing a wine; it takes the chosen slot and
+  the next free ones along the rack.
 - **Fixes.** Two bottles can no longer share a slot, deleting asks for confirmation, settings are saved,
   demo bottles and simulated readings are gone, and the 2,600-line inventory screen is split up.
 

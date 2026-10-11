@@ -31,6 +31,8 @@ import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -47,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +63,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,8 +129,59 @@ fun BottleFormDialog(
     var processing by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    // true when the photo being taken/picked is a label to read, not just a picture
+    var scanRequested by remember { mutableStateOf(false) }
+    var scanNote by remember { mutableStateOf<String?>(null) }
+    var quantity by remember { mutableIntStateOf(1) }
+
+    fun applyScan(uri: Uri) {
+        processing = true
+        error = null
+        scanNote = null
+        scope.launch {
+            val scan = viewModel.scanLabel(uri)
+            processing = false
+            if (scan == null) {
+                error = "Couldn't open that photo. Try another one."
+                return@launch
+            }
+            scan.photo?.let { data ->
+                photoChange = PhotoChange.Replace(data)
+                preview = PhotoUtils.decode(data.thumb)?.asImageBitmap()
+            }
+            val info = scan.info
+            val filled = mutableListOf<String>()
+            info.winery?.let {
+                winery = it
+                filled += "winery"
+            }
+            info.vintage?.let {
+                vintage = it
+                filled += "vintage"
+            }
+            info.varietal?.let {
+                varietalChoice = it
+                if (!presetTouched) preset = presetForVarietal(it)
+                filled += "varietal"
+            }
+            info.classification?.let {
+                classification = it
+                filled += "classification"
+            }
+            scanNote = if (filled.isEmpty()) {
+                "Couldn't make out the label text, so fill the details in by hand. The photo was kept."
+            } else {
+                "Filled in " + filled.joinToString(", ") + " from the label. Check they're right before saving."
+            }
+        }
+    }
 
     fun handlePicked(uri: Uri) {
+        if (scanRequested) {
+            scanRequested = false
+            applyScan(uri)
+            return
+        }
         processing = true
         error = null
         scope.launch {
@@ -142,11 +198,38 @@ fun BottleFormDialog(
 
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
         val uri = pendingCameraUri
-        if (saved && uri != null) handlePicked(uri)
+        if (saved && uri != null) handlePicked(uri) else scanRequested = false
     }
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) handlePicked(uri)
+        if (uri != null) handlePicked(uri) else scanRequested = false
     }
+
+    fun openCamera(scan: Boolean) {
+        try {
+            val uri = newCameraUri(context)
+            pendingCameraUri = uri
+            scanRequested = scan
+            cameraLauncher.launch(uri)
+        } catch (e: ActivityNotFoundException) {
+            scanRequested = false
+            error = "No camera app found on this phone."
+        } catch (e: Exception) {
+            scanRequested = false
+            error = "Couldn't open the camera."
+        }
+    }
+
+    fun openGallery(scan: Boolean) {
+        try {
+            scanRequested = scan
+            galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        } catch (e: Exception) {
+            scanRequested = false
+            error = "Couldn't open your photos."
+        }
+    }
+
+    val freeSlots = if (isEdit) 0 else viewModel.freeSlotCount()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -165,10 +248,56 @@ fun BottleFormDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(top = 4.dp)
             ) {
+                // ---------------------------------------------------------- label scanning
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        "Photograph the front label to fill in the details and add the photo.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = { openCamera(scan = true) },
+                            enabled = !processing,
+                            modifier = Modifier.weight(1f).testTag("form_scan_label")
+                        ) {
+                            Icon(Icons.Rounded.PhotoCamera, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Scan label", style = MaterialTheme.typography.labelMedium)
+                        }
+                        OutlinedButton(
+                            onClick = { openGallery(scan = true) },
+                            enabled = !processing,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("From photos", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                    if (processing && scanNote == null) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                            Text("Working…", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                    scanNote?.let {
+                        Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+
                 OutlinedTextField(
                     value = winery,
                     onValueChange = { winery = it },
                     label = { Text("Winery Name") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("form_winery")
                 )
@@ -176,6 +305,7 @@ fun BottleFormDialog(
                     value = classification,
                     onValueChange = { classification = it },
                     label = { Text("Classification (optional, e.g. Reserve)") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -225,6 +355,7 @@ fun BottleFormDialog(
                             if (!presetTouched) preset = presetForVarietal(it)
                         },
                         label = { Text("Type the varietal") },
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -234,6 +365,7 @@ fun BottleFormDialog(
                     value = vintage,
                     onValueChange = { vintage = it },
                     label = { Text("Vintage year (or NV)") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -265,6 +397,54 @@ fun BottleFormDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                if (!isEdit) {
+                    val startRow = rowText.toIntOrNull()
+                    val startCol = colText.toIntOrNull()
+                    val planned = if (quantity > 1 && startRow != null && startCol != null &&
+                        startRow in 1..CellarLayout.ROWS && startCol in 1..CellarLayout.COLS
+                    ) {
+                        viewModel.planSlots(startRow, startCol, quantity)
+                    } else {
+                        emptyList()
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Number of bottles", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+                            Text(
+                                if (quantity > 1) "One per slot, starting at the slot above" else "$freeSlots free slots in the rack",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        IconButton(onClick = { if (quantity > 1) quantity-- }, enabled = quantity > 1) {
+                            Icon(Icons.Rounded.Remove, contentDescription = "One fewer")
+                        }
+                        Text(
+                            "$quantity",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.width(28.dp),
+                            textAlign = TextAlign.Center
+                        )
+                        IconButton(onClick = { if (quantity < freeSlots) quantity++ }, enabled = quantity < freeSlots) {
+                            Icon(Icons.Rounded.Add, contentDescription = "One more")
+                        }
+                    }
+                    if (planned.isNotEmpty()) {
+                        Text(
+                            "Will use: " + WineCellarViewModel.describeSlots(planned),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
                 Row(
                     modifier = Modifier
@@ -330,17 +510,7 @@ fun BottleFormDialog(
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f)) {
                         OutlinedButton(
-                            onClick = {
-                                try {
-                                    val uri = newCameraUri(context)
-                                    pendingCameraUri = uri
-                                    cameraLauncher.launch(uri)
-                                } catch (e: ActivityNotFoundException) {
-                                    error = "No camera app found on this phone."
-                                } catch (e: Exception) {
-                                    error = "Couldn't open the camera."
-                                }
-                            },
+                            onClick = { openCamera(scan = false) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Rounded.PhotoCamera, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -348,15 +518,7 @@ fun BottleFormDialog(
                             Text("Take photo", style = MaterialTheme.typography.labelMedium)
                         }
                         OutlinedButton(
-                            onClick = {
-                                try {
-                                    galleryLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                } catch (e: Exception) {
-                                    error = "Couldn't open your photos."
-                                }
-                            },
+                            onClick = { openGallery(scan = false) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -458,17 +620,29 @@ fun BottleFormDialog(
                             )
                             val change = photoChange
                             if (initial == null) {
-                                viewModel.addBottle(draft, (change as? PhotoChange.Replace)?.photo)
+                                val slots = viewModel.planSlots(row, col, quantity)
+                                if (slots.size < quantity) {
+                                    error = "There are only ${slots.size} free slots left in the rack."
+                                } else {
+                                    viewModel.addBottles(draft, (change as? PhotoChange.Replace)?.photo, slots)
+                                    onDismiss()
+                                }
                             } else {
                                 viewModel.updateBottle(initial.id, draft, change)
+                                onDismiss()
                             }
-                            onDismiss()
                         }
                     }
                 },
                 modifier = Modifier.testTag("form_save")
             ) {
-                Text(if (isEdit) "Save Changes" else "Store Bottle")
+                Text(
+                    when {
+                        isEdit -> "Save Changes"
+                        quantity > 1 -> "Store $quantity Bottles"
+                        else -> "Store Bottle"
+                    }
+                )
             }
         },
         dismissButton = {

@@ -18,6 +18,8 @@ import com.example.data.CellarLayout
 import com.example.data.CellarRepository
 import com.example.data.ClimateReading
 import com.example.data.GoogleSignIn
+import com.example.data.LabelParser
+import com.example.data.LabelScanner
 import com.example.data.LegacyImporter
 import com.example.data.PhotoChange
 import com.example.data.PhotoData
@@ -221,53 +223,20 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
     fun importLegacy() {
         val id = cellarId.value ?: return
         val state = authState.value as? AuthState.SignedIn ?: return
-        launchImport(id, state, manual = true, extraEmail = null)
+        launchImport(id, state, manual = true)
     }
 
-    /** Imports the old cloud copy saved under the email that was typed into version 1 of the app. */
-    fun importFromOldEmail(oldEmail: String) {
-        val id = cellarId.value ?: return
-        val state = authState.value as? AuthState.SignedIn ?: return
-        if (oldEmail.isBlank()) return
-        launchImport(id, state, manual = true, extraEmail = oldEmail.trim())
-    }
-
-    private val _diagnostics = MutableStateFlow<String?>(null)
-    val diagnostics: StateFlow<String?> = _diagnostics.asStateFlow()
-
-    fun runDiagnostics(oldEmail: String?) {
-        val state = authState.value as? AuthState.SignedIn
-        _diagnostics.value = "Checking…"
-        viewModelScope.launch {
-            _diagnostics.value = try {
-                importer.diagnostics(state?.email, oldEmail?.trim()?.ifBlank { null }, state?.uid) +
-                    "\nSigned in as: " + (state?.email ?: "nobody") +
-                    "\nApp version: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
-            } catch (e: Exception) {
-                "Diagnostics failed: $e"
-            }
-        }
-    }
-
-    fun dismissDiagnostics() {
-        _diagnostics.value = null
-    }
-
-    private fun launchImport(id: String, state: AuthState.SignedIn, manual: Boolean, extraEmail: String?) {
+    private fun launchImport(id: String, state: AuthState.SignedIn, manual: Boolean) {
         if (_importing.value) return
         _importing.value = true
         viewModelScope.launch {
             try {
-                val r = importer.importInto(id, state.uid, state.email, extraEmail)
+                val r = importer.importInto(id, state.uid, state.email)
                 val found = r.imported > 0 || r.alreadyInCellar > 0
                 if (found || manual) {
                     val sb = StringBuilder()
                     if (!found) {
                         sb.append("No bottles from the previous version were found.")
-                        if (r.cloudNotes.isNotEmpty()) {
-                            sb.append("\n\nCloud locations checked:\n")
-                            sb.append(r.cloudNotes.joinToString("\n"))
-                        }
                     } else {
                         sb.append("Imported ${r.imported} bottle")
                         if (r.imported != 1) sb.append("s")
@@ -371,7 +340,7 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
             try {
                 val name = importer.legacyCellarName() ?: "My Cellar"
                 val id = repo.createCellar(state.uid, state.email, name)
-                launchImport(id, state, manual = false, extraEmail = null)
+                launchImport(id, state, manual = false)
             } catch (e: Exception) {
                 message(CellarRepository.friendlyFirestoreError(e))
             } finally {
@@ -438,6 +407,50 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
         repo.addBottle(pair.first, pair.second, draft, photo, onCloudError)
     }
 
+    /** Stores the same wine in several slots at once (one bottle per slot). */
+    fun addBottles(draft: BottleDraft, photo: PhotoData?, slots: List<Pair<Int, Int>>) {
+        val pair = ids() ?: return
+        for (slot in slots) {
+            repo.addBottle(pair.first, pair.second, draft.copy(gridRow = slot.first, gridCol = slot.second), photo, onCloudError)
+        }
+        if (slots.size > 1) message("Stored ${slots.size} bottles: ${describeSlots(slots)}")
+    }
+
+    /**
+     * The slots [count] bottles would go into: the chosen slot first, then the next free slots
+     * along the rack (left to right, row by row, wrapping round to the top).
+     */
+    fun planSlots(startRow: Int, startCol: Int, count: Int): List<Pair<Int, Int>> {
+        val taken = bottles.value.map { Pair(it.gridRow, it.gridCol) }.toSet()
+        val total = CellarLayout.ROWS * CellarLayout.COLS
+        val start = (startRow - 1) * CellarLayout.COLS + (startCol - 1)
+        val out = mutableListOf<Pair<Int, Int>>()
+        for (step in 0 until total) {
+            if (out.size >= count) break
+            val index = (start + step) % total
+            val slot = Pair(index / CellarLayout.COLS + 1, index % CellarLayout.COLS + 1)
+            if (slot !in taken) out += slot
+        }
+        return out
+    }
+
+    fun freeSlotCount(): Int =
+        CellarLayout.ROWS * CellarLayout.COLS - bottles.value.map { Pair(it.gridRow, it.gridCol) }.toSet().size
+
+    /** What a label photo gave us: the processed photo plus whatever details could be read. */
+    data class LabelScan(val photo: PhotoData?, val info: LabelParser.Result)
+
+    suspend fun scanLabel(uri: Uri): LabelScan? = withContext(Dispatchers.IO) {
+        val bitmap = PhotoUtils.loadBitmap(getApplication<Application>(), uri, 2048) ?: return@withContext null
+        val info = try {
+            LabelScanner.read(bitmap)
+        } catch (e: Exception) {
+            Log.w(TAG, "Label reading failed", e)
+            LabelParser.Result()
+        }
+        LabelScan(PhotoUtils.fromBitmap(bitmap), info)
+    }
+
     fun updateBottle(bottleId: String, draft: BottleDraft, change: PhotoChange) {
         val pair = ids() ?: return
         repo.updateBottle(pair.first, pair.second, bottleId, draft, change, onCloudError)
@@ -499,6 +512,14 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
 
     companion object {
         private const val TAG = "WineCellarViewModel"
+
+        /** "R3 C5, R3 C6, R3 C7" or "R3 C5 … R4 C2 (12 slots)" for long runs. */
+        fun describeSlots(slots: List<Pair<Int, Int>>): String {
+            if (slots.size <= 4) return slots.joinToString(", ") { "R${it.first} C${it.second}" }
+            val first = slots.first()
+            val last = slots.last()
+            return "R${first.first} C${first.second} … R${last.first} C${last.second} (${slots.size} slots)"
+        }
         const val DEFAULT_SORT = "Varietal (A-Z)"
         val SORT_OPTIONS = listOf(
             "Varietal (A-Z)",
