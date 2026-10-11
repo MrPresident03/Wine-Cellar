@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Mail
 import androidx.compose.material.icons.rounded.Visibility
@@ -28,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,6 +59,7 @@ import com.example.WineCellarViewModel
 
 @Composable
 fun LoginScreen(viewModel: WineCellarViewModel) {
+    val context = LocalContext.current
     val busy by viewModel.busy.collectAsState()
     val legacyCount by viewModel.legacyCount.collectAsState()
 
@@ -110,8 +115,31 @@ fun LoginScreen(viewModel: WineCellarViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    onClick = { viewModel.signInWithGoogle(context) },
+                    enabled = !busy,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().height(52.dp).testTag("login_google")
+                ) {
+                    if (busy) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Rounded.AccountCircle, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(10.dp))
+                        Text("Continue with Google", fontWeight = FontWeight.Bold)
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                    Text(
+                        "  or use email  ",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                }
                 Text(
-                    if (creating) "CREATE AN ACCOUNT" else "SIGN IN",
+                    if (creating) "CREATE AN ACCOUNT" else "SIGN IN WITH EMAIL",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -150,7 +178,7 @@ fun LoginScreen(viewModel: WineCellarViewModel) {
                 )
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
 
-                Button(
+                OutlinedButton(
                     onClick = {
                         val e = email.trim()
                         when {
@@ -164,11 +192,7 @@ fun LoginScreen(viewModel: WineCellarViewModel) {
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().height(50.dp).testTag("login_submit")
                 ) {
-                    if (busy) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                    } else {
-                        Text(if (creating) "Create account" else "Sign in", fontWeight = FontWeight.Bold)
-                    }
+                    Text(if (creating) "Create account" else "Sign in with email", fontWeight = FontWeight.Bold)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -198,7 +222,7 @@ fun LoginScreen(viewModel: WineCellarViewModel) {
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            "Your partner makes their own account, then joins your cellar with an invite code from Settings.",
+            "Use the same Google account on each of your phones. Someone else signs in with their own account and joins with an invite code from Settings.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
             textAlign = TextAlign.Center

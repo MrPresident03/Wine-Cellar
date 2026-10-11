@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import com.example.data.Cellar
 import com.example.data.CellarLayout
 import com.example.data.CellarRepository
 import com.example.data.ClimateReading
+import com.example.data.GoogleSignIn
 import com.example.data.LegacyImporter
 import com.example.data.PhotoChange
 import com.example.data.PhotoData
@@ -272,6 +274,14 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
         authAction { authRepo.signIn(email.trim(), password) }
     }
 
+    /** [activityContext] must be the Activity, so Google's account picker can appear over it. */
+    fun signInWithGoogle(activityContext: Context) {
+        authAction {
+            val idToken = GoogleSignIn.getIdToken(activityContext)
+            authRepo.signInWithGoogleIdToken(idToken)
+        }
+    }
+
     fun signUp(email: String, password: String) {
         authAction { authRepo.signUp(email.trim(), password) }
     }
@@ -289,6 +299,8 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
             _busy.value = true
             try {
                 block()
+            } catch (e: GetCredentialCancellationException) {
+                // The user closed the Google account picker; nothing to report.
             } catch (e: Exception) {
                 message(AuthRepository.friendlyError(e))
             } finally {
