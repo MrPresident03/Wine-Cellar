@@ -15,8 +15,8 @@ android {
     applicationId = "com.aistudio.winecellar.vntgrk"
     minSdk = 24
     targetSdk = 36
-    versionCode = 3
-    versionName = "2.0.1"
+    versionCode = 5
+    versionName = "2.0.3"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

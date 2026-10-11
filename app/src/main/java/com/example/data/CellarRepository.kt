@@ -333,6 +333,17 @@ class CellarRepository {
         Pair(emptyList(), friendlyFirestoreError(e))
     }
 
+    /** Reads users/{uid}/wines, where the older AI Studio build of the app kept bottles. */
+    suspend fun oldUserWines(uid: String): Pair<List<DocumentSnapshot>, String?> = try {
+        val docs = withTimeoutOrNull(20_000) {
+            userRef(uid).collection("wines").get().await().documents
+        }
+        if (docs == null) Pair(emptyList(), "timed out (no internet?)") else Pair(docs, null)
+    } catch (e: Exception) {
+        Log.w(TAG, "Couldn't read users/$uid/wines", e)
+        Pair(emptyList(), friendlyFirestoreError(e))
+    }
+
     /**
      * Writes imported bottles in batches. Returns false if some batches were still waiting for the
      * server after the timeout (they stay queued on the phone and upload automatically later).

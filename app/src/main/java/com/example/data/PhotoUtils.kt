@@ -43,6 +43,27 @@ object PhotoUtils {
         null
     }
 
+    /** Downloads a photo from a web link (e.g. a Firebase Storage URL) and processes it. */
+    fun fromUrl(url: String): PhotoData? = try {
+        val conn = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+        conn.connectTimeout = 15_000
+        conn.readTimeout = 20_000
+        val bytes = try {
+            conn.inputStream.use { it.readBytes() }
+        } finally {
+            conn.disconnect()
+        }
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        var sample = 1
+        while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= FULL_MAX_PX) sample *= 2
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+        if (bitmap == null) null else fromBitmap(bitmap)
+    } catch (e: Exception) {
+        Log.w(TAG, "Couldn't download photo", e)
+        null
+    }
+
     fun fromBitmap(src: Bitmap): PhotoData {
         val full = scaleDown(src, FULL_MAX_PX)
         val thumb = scaleDown(src, THUMB_MAX_PX)

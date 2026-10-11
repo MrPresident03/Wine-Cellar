@@ -179,22 +179,22 @@ fun SettingsScreen(viewModel: WineCellarViewModel) {
         SettingsCard(title = "Data from the previous version", icon = Icons.Rounded.Download) {
             Text(
                 if (legacyCount > 0) {
-                    "This phone still has $legacyCount bottle${if (legacyCount == 1) "" else "s"} saved by the previous version of the app. " +
-                        "They were copied in when you created your cellar. Run the import again any time; bottles already in the cellar are skipped."
+                    "Found $legacyCount bottle${if (legacyCount == 1) "" else "s"} saved on this phone by older versions of the app. " +
+                        "Tap Import to copy them into this cellar. Bottles already in the cellar are skipped, so it's safe to run more than once."
                 } else {
-                    "No data from the previous version was found on this phone."
+                    "Tap Import to look for bottles saved by older versions, on this phone and in your account online."
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
-            if (legacyCount > 0) {
+            run {
                 Button(onClick = { viewModel.importLegacy() }, enabled = !importing) {
                     if (importing) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(8.dp))
                         Text("Importing…")
                     } else {
-                        Text("Import again")
+                        Text("Import")
                     }
                 }
             }
@@ -229,7 +229,7 @@ fun SettingsScreen(viewModel: WineCellarViewModel) {
         }
 
         Text(
-            "Wine Cellar 2.0.1",
+            "Wine Cellar 2.0.3",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
             modifier = Modifier.align(Alignment.CenterHorizontally)

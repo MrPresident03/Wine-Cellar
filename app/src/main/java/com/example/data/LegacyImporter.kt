@@ -28,7 +28,9 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         val price: Double?,
         val isAging: Boolean,
         val photoUri: String?,
-        val timestamp: Long
+        val timestamp: Long,
+        /** A photo stored inside the old document itself (base64), if any. */
+        val photoBase64: String? = null
     )
 
     data class Result(
@@ -54,11 +56,28 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
             .getString("cellar_name", null)
             ?.takeIf { it.isNotBlank() }
 
-    /** Reads every bottle from the version 1 database on this phone. Call off the main thread. */
+    /**
+     * Reads every bottle from the version 1 database on this phone, plus a scratch copy of the backup
+     * taken before this version first opened it. Call off the main thread.
+     */
     fun readLocal(): List<LegacyBottle> {
         val file = dbFile
         if (!file.exists()) return emptyList()
         backupOnce(file)
+        val out = mutableListOf<LegacyBottle>()
+        out += readRoomDb(file)
+        val backupDir = File(context.filesDir, "v1_backup")
+        if (File(backupDir, DB_NAME).exists()) {
+            val scratch = File(context.cacheDir, "v1_check")
+            scratch.deleteRecursively()
+            scratch.mkdirs()
+            backupDir.listFiles()?.forEach { it.copyTo(File(scratch, it.name), overwrite = true) }
+            out += readRoomDb(File(scratch, DB_NAME))
+        }
+        return out.distinctBy { listOf(it.winery, it.varietal, it.vintage, it.row, it.col, it.timestamp) }
+    }
+
+    private fun readRoomDb(file: File): List<LegacyBottle> {
         val out = mutableListOf<LegacyBottle>()
         try {
             SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
@@ -85,6 +104,148 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
             lastLocalError = e.toString()
         }
         return out
+    }
+
+    // ------------------------------------------------------------------ offline caches of other projects
+
+    private fun currentProjectId(): String? = try {
+        com.google.firebase.FirebaseApp.getInstance().options.projectId
+    } catch (e: Exception) {
+        null
+    }
+
+    private fun cacheFiles(): List<File> = FirestoreCacheReader.cacheFiles(dbFile.parentFile, currentProjectId())
+
+    /**
+     * Bottles found in Firestore offline caches left by older builds that used a different Firebase
+     * project (e.g. "wine-cellar-vault-default").
+     */
+    fun readOfflineCaches(): List<LegacyBottle> {
+        val others = cacheFiles().flatMap { file ->
+            FirestoreCacheReader.readFile(file).mapNotNull { toLegacyBottle(it) }
+        }
+        // The current project's cache may also hold the old build's "wines" folders.
+        val projectId = currentProjectId()
+        val current = dbFile.parentFile?.listFiles()
+            ?.filter { f ->
+                projectId != null && f.name.startsWith("firestore.") && f.name.contains(projectId) &&
+                    !f.name.endsWith("-journal") && !f.name.endsWith("-wal") && !f.name.endsWith("-shm")
+            }
+            ?.flatMap { file ->
+                FirestoreCacheReader.readFile(file)
+                    .filter { it.collection.endsWith("wines", ignoreCase = true) }
+                    .mapNotNull { toLegacyBottle(it) }
+            }
+            ?: emptyList()
+        return others + current
+    }
+
+    /** Firestore values as plain Kotlin values (timestamps to millis, blobs to bytes). */
+    private fun plain(value: Any?): Any? = when (value) {
+        is com.google.firebase.Timestamp -> value.toDate().time
+        is com.google.firebase.firestore.Blob -> value.toBytes()
+        is Map<*, *> -> value.entries.associate { (k, v) -> k.toString() to plain(v) }
+        is List<*> -> value.map { plain(it) }
+        else -> value
+    }
+
+    /** Bottles in users/{uid}/wines (the older AI Studio build), plus a note for diagnostics. */
+    private suspend fun readOldUserWines(uid: String?): Pair<List<LegacyBottle>, String?> {
+        if (uid == null) return Pair(emptyList(), null)
+        val (docs, error) = repo.oldUserWines(uid)
+        if (error != null) return Pair(emptyList(), "users/$uid/wines: couldn't read ($error)")
+        val bottles = docs.mapNotNull { d ->
+            val data = d.data ?: return@mapNotNull null
+            toLegacyBottle("users/$uid/wines", data.mapValues { plain(it.value) })
+        }
+        val keys = docs.flatMap { it.data?.keys ?: emptySet() }.distinct().take(20).joinToString(",")
+        return Pair(bottles, "users/$uid/wines: ${docs.size} documents, ${bottles.size} usable [$keys]")
+    }
+
+    /** Everything from older versions that's stored on this phone. */
+    fun phoneBottles(): List<LegacyBottle> = readOfflineCaches() + readLocal()
+
+    private fun toLegacyBottle(doc: FirestoreCacheReader.Doc): LegacyBottle? = toLegacyBottle(doc.collection, doc.fields)
+
+    private fun toLegacyBottle(collection: String, fields: Map<String, Any?>): LegacyBottle? {
+        val f = fields.mapKeys { it.key.lowercase() }
+
+        fun str(vararg keys: String): String? = keys.firstNotNullOfOrNull { k ->
+            when (val v = f[k]) {
+                is String -> v.takeIf { it.isNotBlank() && it.length < 300 }
+                is Long -> v.toString()
+                is Double -> if (v == Math.floor(v)) v.toLong().toString() else v.toString()
+                else -> null
+            }
+        }
+
+        fun num(vararg keys: String): Double? = keys.firstNotNullOfOrNull { k ->
+            when (val v = f[k]) {
+                is Long -> v.toDouble()
+                is Double -> v
+                is String -> v.replace("$", "").replace(",", ".").trim().toDoubleOrNull()
+                else -> null
+            }
+        }
+
+        fun bool(vararg keys: String): Boolean? = keys.firstNotNullOfOrNull { k -> f[k] as? Boolean }
+
+        val looksLikeBottle = collection.endsWith("bottles", ignoreCase = true) ||
+            collection.endsWith("wines", ignoreCase = true) ||
+            (("wineryname" in f || "winery" in f) && ("varietal" in f || "vintage" in f))
+        if (!looksLikeBottle) return null
+
+        val winery = str("wineryname", "winery", "producer", "estate", "name") ?: ""
+        val varietal = str("varietal", "variety", "grape", "type") ?: ""
+        if (winery.isBlank() && varietal.isBlank()) return null
+
+        // A photo may be stored in the document itself as base64 text or raw bytes.
+        var photoBase64: String? = null
+        for (v in f.values) {
+            val candidate = when (v) {
+                is String -> if (v.length > 2000) v.substringAfter("base64,", v) else null
+                is ByteArray -> if (v.size > 1500) android.util.Base64.encodeToString(v, android.util.Base64.NO_WRAP) else null
+                else -> null
+            }
+            if (candidate != null) {
+                photoBase64 = candidate
+                break
+            }
+        }
+
+        return LegacyBottle(
+            winery = winery,
+            classification = str("classification", "designation", "label"),
+            varietal = varietal,
+            vintage = str("vintage", "year") ?: "",
+            row = num("gridrow", "row", "rackrow")?.toInt() ?: 1,
+            col = num("gridcol", "col", "column", "rackcol")?.toInt() ?: 1,
+            price = num("price", "cost"),
+            isAging = bool("isaging", "aging") ?: false,
+            photoUri = str("photouri", "photourl", "photopath", "imageuri", "imageurl", "photo", "image"),
+            timestamp = num("timestamp", "createdat", "addedat", "updatedat")?.toLong() ?: System.currentTimeMillis(),
+            photoBase64 = photoBase64
+        )
+    }
+
+    private fun cacheSummary(): String {
+        val files = cacheFiles()
+        if (files.isEmpty()) return "Older offline copies: none\n"
+        val sb = StringBuilder()
+        for (file in files) {
+            val docs = FirestoreCacheReader.readFile(file)
+            val bottles = docs.count { toLegacyBottle(it) != null }
+            sb.append("Older offline copy ").append(file.name.substringAfter("%5D.").substringBefore(".%28"))
+                .append(": ").append(docs.size).append(" documents, ").append(bottles).append(" look like bottles\n")
+            docs.groupBy { d ->
+                // Replace document ids with * so collections group together
+                d.collection.split("/").mapIndexed { i, part -> if (i % 2 == 1) "*" else part }.joinToString("/")
+            }.forEach { (collection, list) ->
+                val keys = list.flatMap { it.fields.keys }.distinct().take(15).joinToString(",")
+                sb.append("  ").append(collection).append(" x").append(list.size).append(" [").append(keys).append("]\n")
+            }
+        }
+        return sb.toString()
     }
 
     private fun savedLegacyEmail(): String? =
@@ -134,7 +295,7 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
     }
 
     /** A plain-text report of where version 1 data could be, for troubleshooting. */
-    suspend fun diagnostics(currentEmail: String?, extraEmail: String?): String = withContext(Dispatchers.IO) {
+    suspend fun diagnostics(currentEmail: String?, extraEmail: String?, uid: String?): String = withContext(Dispatchers.IO) {
         val sb = StringBuilder()
         sb.append("App: ").append(context.packageName).append('\n')
         val dbDir = dbFile.parentFile
@@ -154,6 +315,8 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         sb.append('\n')
         val backup = File(context.filesDir, "v1_backup").listFiles()?.joinToString { "${it.name} (${it.length()} B)" }
         sb.append("Backup copy: ").append(if (backup.isNullOrEmpty()) "none" else backup).append('\n')
+        sb.append(cacheSummary())
+        readOldUserWines(uid).second?.let { sb.append("Cloud ").append(it).append('\n') }
         val (_, notes) = readCloud(listOf(savedLegacyEmail(), currentEmail, extraEmail))
         if (notes.isEmpty()) sb.append("Old cloud copy: no email to look up\n")
         notes.forEach { sb.append("Old cloud ").append(it).append('\n') }
@@ -166,7 +329,16 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
             db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null).use { c ->
                 while (c.moveToNext()) tables += c.getString(0)
             }
-            tables.joinToString { t ->
+            val seq = try {
+                db.rawQuery("SELECT name, seq FROM sqlite_sequence", null).use { c ->
+                    val parts = mutableListOf<String>()
+                    while (c.moveToNext()) parts += c.getString(0) + " last id " + c.getLong(1)
+                    parts.joinToString()
+                }
+            } catch (e: Exception) {
+                "?"
+            }
+            "(" + seq + ") " + tables.joinToString { t ->
                 val count = try {
                     db.rawQuery("SELECT COUNT(*) FROM \"" + t.replace("\"", "") + "\"", null).use { c ->
                         if (c.moveToFirst()) c.getLong(0).toString() else "?"
@@ -187,8 +359,11 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
         email: String?,
         extraEmail: String? = null
     ): Result = withContext(Dispatchers.IO) {
-        val local = readLocal()
-        val (cloud, cloudNotes) = readCloud(listOf(savedLegacyEmail(), email, extraEmail))
+        val (userWines, userWinesNote) = readOldUserWines(uid)
+        val local = userWines + readOfflineCaches() + readLocal()
+        val (legacyCloud, legacyNotes) = readCloud(listOf(savedLegacyEmail(), email, extraEmail))
+        val cloud = legacyCloud
+        val cloudNotes = listOfNotNull(userWinesNote) + legacyNotes
 
         val existingKeys = repo.bottlesOnce(cellarId)
             .map { key(it.wineryName, it.varietal, it.vintage, it.gridRow, it.gridCol) }
@@ -210,7 +385,12 @@ class LegacyImporter(private val context: Context, private val repo: CellarRepos
 
             val photoPath = b.photoUri?.takeIf { it.isNotBlank() && !it.startsWith("preset_") }
             val photoFile = photoPath?.let { File(it) }?.takeIf { it.exists() }
-            val photo = photoFile?.let { PhotoUtils.fromFile(it) }
+            val embedded = b.photoBase64?.let { PhotoUtils.decode(it) }
+            val photo = when {
+                embedded != null -> PhotoUtils.fromBitmap(embedded)
+                photoPath != null && photoPath.startsWith("http") -> PhotoUtils.fromUrl(photoPath)
+                else -> photoFile?.let { PhotoUtils.fromFile(it) }
+            }
             if (photo != null) photos++
 
             val preset = b.photoUri?.takeIf { it.startsWith("preset_") } ?: presetForVarietal(b.varietal)

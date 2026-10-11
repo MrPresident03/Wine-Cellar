@@ -240,7 +240,7 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
         _diagnostics.value = "Checking…"
         viewModelScope.launch {
             _diagnostics.value = try {
-                importer.diagnostics(state?.email, oldEmail?.trim()?.ifBlank { null }) +
+                importer.diagnostics(state?.email, oldEmail?.trim()?.ifBlank { null }, state?.uid) +
                     "\nSigned in as: " + (state?.email ?: "nobody") +
                     "\nApp version: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
             } catch (e: Exception) {
@@ -288,6 +288,13 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
                     "Your old data is untouched on this phone. You can run the import again from Settings."
             } finally {
                 _importing.value = false
+                _legacyCount.value = withContext(Dispatchers.IO) {
+                    try {
+                        importer.phoneBottles().size
+                    } catch (e: Exception) {
+                        0
+                    }
+                }
             }
         }
     }
@@ -295,7 +302,11 @@ class WineCellarViewModel(application: Application) : AndroidViewModel(applicati
     init {
         viewModelScope.launch {
             _legacyCount.value = withContext(Dispatchers.IO) {
-                if (importer.hasLocalData()) importer.readLocal().size else 0
+                try {
+                    importer.phoneBottles().size
+                } catch (e: Exception) {
+                    0
+                }
             }
         }
         if (_alertsEnabled.value) ClimateAlertWorker.schedule(application)
