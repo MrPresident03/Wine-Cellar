@@ -12,7 +12,20 @@
           "package_name": "com.aistudio.winecellar.vntgrk"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "969319706983-lurrtobhq9lqbp47ci3ehrtf8o4583qe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aistudio.winecellar.vntgrk",
+            "certificate_hash": "478013233df415268a8efb48564b809e7fac1d4f"
+          }
+        },
+        {
+          "client_id": "969319706983-svmjb7hp7871j4l9k2b2tnsvcfs1j5tc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyATKV0t7n2uJCDZaq0SjRYATqz8XHLP17c"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "969319706983-svmjb7hp7871j4l9k2b2tnsvcfs1j5tc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
