@@ -1,15 +1,24 @@
 *.iml
-.gradle
-.kotlin
-/local.properties
-/.idea
-.DS_Store
-/build
-/app/build
-/captures
-.externalNativeBuild
-.cxx
+.gradle/
+.kotlin/
+build/
 local.properties
+.idea/
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
 .env
-debug.keystore
-.build-outputs/
+*.keystore
+*.jks
+!legacy/**
+# iOS
+iosApp/iosApp.xcodeproj/xcuserdata/
+iosApp/iosApp.xcodeproj/project.xcworkspace/xcuserdata/
+iosApp/build/
+DerivedData/
+xcuserdata/
+# Secrets for the app build (see README)
+secrets.properties
+supabase/.temp/
+supabase/.branches/

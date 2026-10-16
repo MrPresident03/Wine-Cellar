@@ -1,0 +1,504 @@
+-- House of Vino local database, schema version 1 -> 2 (initial schema).
+--
+-- Conventions
+--   * ids are UUID strings created on the device (see core Ids), so rows can be made offline.
+--   * timestamps are epoch milliseconds (UTC); calendar dates are ISO-8601 text (YYYY-MM-DD).
+--   * money is an exact integer count of minor units plus an ISO currency code. Never REAL.
+--   * decimals (rates, ABV, ratings) are plain decimal strings. Never REAL.
+--   * synced tables carry: household_id, created_at, updated_at, updated_by, rev, deleted_at.
+--       rev        = server revision this row was last synced at (0 = never synced)
+--       deleted_at = tombstone; rows are soft-deleted so deletions sync and history survives.
+--   * inventory_movement is an append-only ledger. stock holds balances derived from it.
+
+CREATE TABLE app_meta (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+CREATE TABLE household (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    home_currency TEXT NOT NULL DEFAULT 'NZD',
+    is_local_only INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+
+-- Server-authoritative; read-only copy on the device.
+CREATE TABLE household_member (
+    household_id TEXT NOT NULL REFERENCES household(id),
+    user_id TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('owner', 'editor', 'viewer')),
+    display_name TEXT,
+    email TEXT,
+    joined_at INTEGER NOT NULL,
+    rev INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (household_id, user_id)
+);
+
+-- Wine identity: producer + cuvée, independent of vintage and of how many bottles are owned.
+CREATE TABLE wine (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    producer TEXT NOT NULL,
+    name TEXT NOT NULL DEFAULT '',
+    style TEXT CHECK (style IS NULL OR style IN ('red', 'white', 'rose', 'sparkling', 'sweet', 'fortified', 'orange', 'other')),
+    country TEXT,
+    region TEXT,
+    sub_region TEXT,
+    appellation TEXT,
+    classification TEXT,
+    -- JSON array of {"name": "...", "percent": "60"}; percent optional.
+    grapes TEXT NOT NULL DEFAULT '[]',
+    notes TEXT,
+    identity_key TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX wine_household ON wine(household_id, deleted_at);
+CREATE INDEX wine_identity ON wine(household_id, identity_key);
+CREATE INDEX wine_producer ON wine(household_id, producer COLLATE NOCASE);
+
+-- A specific vintage of a wine. Different vintages are always different rows.
+CREATE TABLE wine_vintage (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    wine_id TEXT NOT NULL REFERENCES wine(id),
+    vintage_kind TEXT NOT NULL CHECK (vintage_kind IN ('year', 'nv', 'unknown')),
+    vintage_year INTEGER CHECK (vintage_year IS NULL OR vintage_year BETWEEN 1700 AND 2200),
+    alcohol_pct TEXT,
+    drink_from INTEGER,
+    drink_to INTEGER,
+    drink_source TEXT,
+    drink_note TEXT,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    CHECK ((vintage_kind = 'year') = (vintage_year IS NOT NULL)),
+    CHECK (drink_from IS NULL OR drink_to IS NULL OR drink_from <= drink_to)
+);
+CREATE INDEX vintage_wine ON wine_vintage(wine_id, vintage_kind, vintage_year);
+CREATE INDEX vintage_household ON wine_vintage(household_id, deleted_at);
+CREATE INDEX vintage_drink ON wine_vintage(household_id, drink_to);
+
+-- Places bottles live: a tree of sites, rooms, fridges, racks, shelves, bins and cases.
+CREATE TABLE location (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    parent_id TEXT REFERENCES location(id),
+    kind TEXT NOT NULL,
+    name TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    grid_rows INTEGER CHECK (grid_rows IS NULL OR grid_rows BETWEEN 1 AND 200),
+    grid_cols INTEGER CHECK (grid_cols IS NULL OR grid_cols BETWEEN 1 AND 200),
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    CHECK ((grid_rows IS NULL) = (grid_cols IS NULL)),
+    CHECK (parent_id IS NULL OR parent_id <> id)
+);
+CREATE INDEX location_parent ON location(household_id, parent_id);
+
+-- An acquisition batch ("lot"): bottles of one vintage and size bought or received together.
+CREATE TABLE lot (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    vintage_id TEXT NOT NULL REFERENCES wine_vintage(id),
+    format_ml INTEGER NOT NULL DEFAULT 750 CHECK (format_ml BETWEEN 50 AND 30000),
+    quantity_acquired INTEGER NOT NULL CHECK (quantity_acquired >= 0),
+    unit_price_minor INTEGER,
+    price_currency TEXT,
+    extra_costs_minor INTEGER,
+    acquired_on TEXT,
+    source TEXT,
+    source_ref TEXT,
+    case_type TEXT NOT NULL DEFAULT 'none' CHECK (case_type IN ('none', 'owc', 'oc', 'other')),
+    case_size INTEGER CHECK (case_size IS NULL OR case_size > 0),
+    wishlist_item_id TEXT,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    CHECK ((unit_price_minor IS NULL AND extra_costs_minor IS NULL) OR price_currency IS NOT NULL)
+);
+CREATE INDEX lot_vintage ON lot(vintage_id);
+CREATE INDEX lot_household ON lot(household_id, deleted_at);
+
+-- The ledger. Rows are never updated (except their sync state) and never deleted.
+CREATE TABLE inventory_movement (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    lot_id TEXT NOT NULL REFERENCES lot(id),
+    kind TEXT NOT NULL CHECK (kind IN ('purchase', 'receive', 'adjust_in', 'consume', 'sell', 'gift_out', 'loss', 'adjust_out', 'transfer', 'reversal')),
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    from_location_id TEXT REFERENCES location(id),
+    to_location_id TEXT REFERENCES location(id),
+    occurred_at INTEGER NOT NULL,
+    recorded_at INTEGER NOT NULL,
+    recorded_by TEXT,
+    device_id TEXT NOT NULL,
+    price_minor INTEGER,
+    price_currency TEXT,
+    counterparty TEXT,
+    note TEXT,
+    reverses_id TEXT REFERENCES inventory_movement(id),
+    sync_state TEXT NOT NULL DEFAULT 'pending' CHECK (sync_state IN ('pending', 'confirmed', 'rejected')),
+    reject_reason TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    CHECK (from_location_id IS NOT NULL OR to_location_id IS NOT NULL),
+    CHECK (from_location_id IS NULL OR to_location_id IS NULL OR from_location_id <> to_location_id),
+    CHECK ((price_minor IS NULL) = (price_currency IS NULL))
+);
+CREATE INDEX movement_lot ON inventory_movement(lot_id, occurred_at);
+CREATE INDEX movement_household_time ON inventory_movement(household_id, occurred_at);
+CREATE INDEX movement_reverses ON inventory_movement(reverses_id);
+CREATE INDEX movement_sync ON inventory_movement(sync_state);
+
+-- Escape hatch for whole-database maintenance (e.g. leaving a household removes its local copy).
+CREATE TABLE ledger_maintenance (
+    active INTEGER NOT NULL
+);
+
+CREATE TRIGGER movement_append_only
+BEFORE UPDATE OF household_id, lot_id, kind, quantity, from_location_id, to_location_id, occurred_at, recorded_at, recorded_by, device_id, price_minor, price_currency, reverses_id
+ON inventory_movement
+WHEN NOT EXISTS (SELECT 1 FROM ledger_maintenance WHERE active = 1)
+BEGIN
+    SELECT RAISE(ABORT, 'inventory_movement is append-only');
+END;
+
+CREATE TRIGGER movement_no_delete
+BEFORE DELETE ON inventory_movement
+WHEN NOT EXISTS (SELECT 1 FROM ledger_maintenance WHERE active = 1)
+BEGIN
+    SELECT RAISE(ABORT, 'inventory_movement rows cannot be deleted');
+END;
+
+-- Balance per lot and location. confirmed_qty comes from movements the server has accepted (or,
+-- in local-only mode, every movement); pending_delta from movements not yet accepted.
+CREATE TABLE stock (
+    lot_id TEXT NOT NULL REFERENCES lot(id),
+    location_id TEXT NOT NULL REFERENCES location(id),
+    household_id TEXT NOT NULL REFERENCES household(id),
+    confirmed_qty INTEGER NOT NULL DEFAULT 0 CHECK (confirmed_qty >= 0),
+    pending_delta INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (lot_id, location_id)
+);
+CREATE INDEX stock_location ON stock(location_id);
+CREATE INDEX stock_household ON stock(household_id);
+
+-- Optional exact positions in gridded locations (racks). At most one bottle per slot.
+CREATE TABLE bottle_position (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    location_id TEXT NOT NULL REFERENCES location(id),
+    lot_id TEXT NOT NULL REFERENCES lot(id),
+    row_index INTEGER NOT NULL CHECK (row_index >= 0),
+    col_index INTEGER NOT NULL CHECK (col_index >= 0),
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE UNIQUE INDEX bottle_position_slot ON bottle_position(location_id, row_index, col_index) WHERE deleted_at IS NULL;
+CREATE INDEX bottle_position_lot ON bottle_position(lot_id, location_id);
+
+CREATE TABLE tasting_note (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    vintage_id TEXT NOT NULL REFERENCES wine_vintage(id),
+    lot_id TEXT REFERENCES lot(id),
+    movement_id TEXT REFERENCES inventory_movement(id),
+    author_id TEXT,
+    tasted_on TEXT NOT NULL,
+    rating_value TEXT,
+    rating_scale TEXT CHECK (rating_scale IS NULL OR rating_scale IN ('100', '20', '10', '5')),
+    rating_100 INTEGER CHECK (rating_100 IS NULL OR rating_100 BETWEEN 0 AND 100),
+    appearance TEXT,
+    nose TEXT,
+    palate TEXT,
+    finish TEXT,
+    conclusion TEXT,
+    sweetness INTEGER CHECK (sweetness IS NULL OR sweetness BETWEEN 1 AND 5),
+    acidity INTEGER CHECK (acidity IS NULL OR acidity BETWEEN 1 AND 5),
+    tannin INTEGER CHECK (tannin IS NULL OR tannin BETWEEN 1 AND 5),
+    body INTEGER CHECK (body IS NULL OR body BETWEEN 1 AND 5),
+    intensity INTEGER CHECK (intensity IS NULL OR intensity BETWEEN 1 AND 5),
+    aromas TEXT NOT NULL DEFAULT '[]',
+    notes TEXT,
+    occasion TEXT,
+    companions TEXT,
+    food_pairing TEXT,
+    place TEXT,
+    would_buy_again INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    CHECK ((rating_value IS NULL) = (rating_scale IS NULL))
+);
+CREATE INDEX tasting_vintage ON tasting_note(vintage_id, tasted_on);
+CREATE INDEX tasting_household ON tasting_note(household_id, tasted_on);
+
+CREATE TABLE photo (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    owner_type TEXT NOT NULL CHECK (owner_type IN ('wine', 'vintage', 'lot', 'tasting', 'location', 'wishlist')),
+    owner_id TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'label' CHECK (role IN ('label', 'back_label', 'bottle', 'tasting', 'receipt', 'other')),
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    storage_path TEXT,
+    width INTEGER,
+    height INTEGER,
+    byte_size INTEGER,
+    sha256 TEXT,
+    -- device-only columns
+    local_path TEXT,
+    thumb_path TEXT,
+    upload_state TEXT NOT NULL DEFAULT 'local' CHECK (upload_state IN ('local', 'queued', 'uploading', 'uploaded', 'failed')),
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX photo_owner ON photo(owner_type, owner_id, sort_order);
+CREATE INDEX photo_upload ON photo(upload_state);
+
+CREATE TABLE wishlist_item (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    wine_id TEXT REFERENCES wine(id),
+    vintage_id TEXT REFERENCES wine_vintage(id),
+    title TEXT NOT NULL,
+    producer TEXT,
+    wine_name TEXT,
+    style TEXT,
+    region TEXT,
+    vintage_from INTEGER,
+    vintage_to INTEGER,
+    accepts_nv INTEGER NOT NULL DEFAULT 0,
+    format_ml INTEGER CHECK (format_ml IS NULL OR format_ml BETWEEN 50 AND 30000),
+    desired_quantity INTEGER NOT NULL DEFAULT 1 CHECK (desired_quantity > 0),
+    target_price_minor INTEGER,
+    max_price_minor INTEGER,
+    price_currency TEXT,
+    priority INTEGER NOT NULL DEFAULT 2 CHECK (priority BETWEEN 1 AND 3),
+    status TEXT NOT NULL DEFAULT 'wanted' CHECK (status IN ('wanted', 'watching', 'ordered', 'acquired', 'dropped')),
+    notes TEXT,
+    acquired_lot_id TEXT REFERENCES lot(id),
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    CHECK (vintage_from IS NULL OR vintage_to IS NULL OR vintage_from <= vintage_to),
+    CHECK ((target_price_minor IS NULL AND max_price_minor IS NULL) OR price_currency IS NOT NULL)
+);
+CREATE INDEX wishlist_household ON wishlist_item(household_id, status, priority);
+
+CREATE TABLE wishlist_link (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    item_id TEXT NOT NULL REFERENCES wishlist_item(id),
+    merchant TEXT,
+    url TEXT,
+    last_price_minor INTEGER,
+    last_price_currency TEXT,
+    price_seen_on TEXT,
+    note TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER,
+    CHECK ((last_price_minor IS NULL) = (last_price_currency IS NULL))
+);
+CREATE INDEX wishlist_link_item ON wishlist_link(item_id);
+
+-- Estimated market values, always with their source, currency and date. Never generated by the app.
+CREATE TABLE market_value (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    vintage_id TEXT NOT NULL REFERENCES wine_vintage(id),
+    format_ml INTEGER NOT NULL DEFAULT 750,
+    amount_minor INTEGER NOT NULL CHECK (amount_minor >= 0),
+    currency TEXT NOT NULL,
+    source TEXT NOT NULL,
+    source_ref TEXT,
+    as_of TEXT NOT NULL,
+    note TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX market_value_vintage ON market_value(vintage_id, format_ml, as_of);
+
+CREATE TABLE fx_rate (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    from_currency TEXT NOT NULL,
+    to_currency TEXT NOT NULL,
+    rate TEXT NOT NULL,
+    as_of TEXT NOT NULL,
+    source TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX fx_pair ON fx_rate(household_id, from_currency, to_currency, as_of);
+
+CREATE TABLE tag (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    name TEXT NOT NULL,
+    name_key TEXT NOT NULL,
+    color TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX tag_name ON tag(household_id, name_key);
+
+CREATE TABLE tag_link (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    tag_id TEXT NOT NULL REFERENCES tag(id),
+    target_type TEXT NOT NULL CHECK (target_type IN ('wine', 'vintage', 'lot', 'wishlist', 'tasting')),
+    target_id TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX tag_link_target ON tag_link(target_type, target_id);
+CREATE INDEX tag_link_tag ON tag_link(tag_id);
+
+-- A barcode seen on a bottle of this wine. Barcodes are not unique: one GTIN may cover several
+-- vintages or sizes, so a scan only produces candidates for the user to confirm.
+CREATE TABLE barcode_link (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    gtin TEXT NOT NULL,
+    wine_id TEXT NOT NULL REFERENCES wine(id),
+    vintage_id TEXT REFERENCES wine_vintage(id),
+    format_ml INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+CREATE INDEX barcode_gtin ON barcode_link(household_id, gtin);
+
+CREATE TABLE saved_search (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL REFERENCES household(id),
+    owner_id TEXT,
+    name TEXT NOT NULL,
+    query_json TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    updated_by TEXT,
+    rev INTEGER NOT NULL DEFAULT 0,
+    deleted_at INTEGER
+);
+
+-- Device-only.
+CREATE TABLE recent_query (
+    household_id TEXT NOT NULL,
+    scope TEXT NOT NULL,
+    query_text TEXT NOT NULL,
+    used_at INTEGER NOT NULL,
+    PRIMARY KEY (household_id, scope, query_text)
+);
+
+-- ------------------------------------------------------------------ search index
+
+-- Maps index rows (search_fts.rowid = search_doc.id) to the record they describe.
+CREATE TABLE search_doc (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    household_id TEXT NOT NULL,
+    doc_type TEXT NOT NULL CHECK (doc_type IN ('vintage', 'wishlist', 'tasting')),
+    doc_id TEXT NOT NULL,
+    UNIQUE (doc_type, doc_id)
+);
+
+CREATE VIRTUAL TABLE search_fts USING fts5(
+    producer,
+    name,
+    vintage,
+    region,
+    grapes,
+    tags,
+    notes,
+    tokenize = 'unicode61 remove_diacritics 2',
+    prefix = '2 3'
+);
+
+-- ------------------------------------------------------------------ sync
+
+-- Local changes waiting to be sent. One queued row per record: later edits coalesce into it.
+CREATE TABLE sync_outbox (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    op_id TEXT NOT NULL UNIQUE,
+    household_id TEXT NOT NULL,
+    entity TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    op TEXT NOT NULL CHECK (op IN ('upsert', 'movement', 'photo')),
+    base_rev INTEGER NOT NULL DEFAULT 0,
+    base_json TEXT,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    next_attempt_at INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    state TEXT NOT NULL DEFAULT 'queued' CHECK (state IN ('queued', 'in_flight', 'failed', 'blocked')),
+    created_at INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX outbox_entity ON sync_outbox(entity, entity_id) WHERE op = 'upsert';
+CREATE INDEX outbox_ready ON sync_outbox(state, next_attempt_at, seq);
+
+CREATE TABLE sync_cursor (
+    household_id TEXT NOT NULL,
+    entity TEXT NOT NULL,
+    last_rev INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (household_id, entity)
+);
+
+CREATE TABLE sync_conflict (
+    id TEXT NOT NULL PRIMARY KEY,
+    household_id TEXT NOT NULL,
+    entity TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    fields TEXT NOT NULL,
+    local_json TEXT NOT NULL,
+    remote_json TEXT NOT NULL,
+    base_json TEXT,
+    detected_at INTEGER NOT NULL,
+    resolved_at INTEGER,
+    resolution TEXT
+);
+CREATE INDEX conflict_open ON sync_conflict(household_id, resolved_at);
