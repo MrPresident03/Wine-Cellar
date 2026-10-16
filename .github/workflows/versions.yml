@@ -41,6 +41,21 @@ jobs:
           curl -fsSL https://repo.maven.apache.org/maven2/com/eygraber/sqldelight-androidx-driver/maven-metadata.xml | grep -o '<version>[^<]*' | tail -5 >> out/poms.txt || true
           V=$(curl -fsSL https://repo.maven.apache.org/maven2/com/eygraber/sqldelight-androidx-driver/maven-metadata.xml | grep -o '<release>[^<]*' | sed 's/<release>//')
           if [ -n "$V" ]; then curl -fsSL "https://repo.maven.apache.org/maven2/com/eygraber/sqldelight-androidx-driver/$V/sqldelight-androidx-driver-$V.module" | grep -E '"(group|module|version|requires)"' | sort -u | head -60 >> out/poms.txt; fi
+      - name: Navigation 3 API surface
+        run: |
+          mkdir -p /tmp/n3 && cd /tmp/n3
+          curl -fsSL -o ui.jar https://repo.maven.apache.org/maven2/org/jetbrains/androidx/navigation3/navigation3-ui/1.1.2/navigation3-ui-1.1.2-sources.jar || true
+          curl -fsSL -o rt.jar https://repo.maven.apache.org/maven2/org/jetbrains/androidx/navigation3/navigation3-runtime/1.1.2/navigation3-runtime-1.1.2-sources.jar || true
+          for j in ui.jar rt.jar; do unzip -o -q $j -d src-$j 2>/dev/null || true; done
+          { echo "== files"; find . -name '*.kt' | sed 's|^./||' | head -80
+            echo "== NavDisplay"; grep -rh -A40 'public fun <T : Any> NavDisplay' --include=*.kt . | head -120
+            echo "== entryProvider"; grep -rh -B2 -A12 'fun <T : Any> entryProvider' --include=*.kt . | head -60
+            echo "== decorators"; grep -rhn 'fun .*Decorator' --include=*.kt . | head -30
+          } > $GITHUB_WORKSPACE/out/nav3.txt 2>&1 || true
+          L=/tmp/lv; mkdir -p $L && cd $L
+          V=$(curl -fsSL https://repo.maven.apache.org/maven2/org/jetbrains/androidx/lifecycle/lifecycle-viewmodel-navigation3/maven-metadata.xml | grep -o '<release>[^<]*' | sed 's/<release>//')
+          echo "lifecycle-viewmodel-navigation3 release: $V" >> $GITHUB_WORKSPACE/out/nav3.txt
+          if [ -n "$V" ]; then curl -fsSL -o s.jar "https://repo.maven.apache.org/maven2/org/jetbrains/androidx/lifecycle/lifecycle-viewmodel-navigation3/$V/lifecycle-viewmodel-navigation3-$V-sources.jar" && unzip -o -q s.jar -d s && grep -rh -B3 -A20 'fun .*rememberViewModelStoreNavEntryDecorator' s | head -60 >> $GITHUB_WORKSPACE/out/nav3.txt; fi
       - name: Xcode and runner images
         run: |
           {

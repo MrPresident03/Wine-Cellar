@@ -8,7 +8,7 @@ Legend: ☐ not started · ◐ in progress · ☑ done (with the evidence in bra
 
 - ☑ Inspect the existing repository and record what's kept ([00-repo-survey.md](00-repo-survey.md))
 - ☑ Architecture decision record with verified versions ([adr/0001-architecture.md](adr/0001-architecture.md))
-- ☑ Database schema ([schema.md](schema.md), `migrations/1.sqm`)
+- ☑ Database schema ([schema.md](schema.md), `sqldelight/.../db/1.sqm`)
 - ☑ Navigation map ([navigation.md](navigation.md))
 - ☑ Design system ([design-system.md](design-system.md))
 - ☑ KMP project: core, data, ui, androidApp, iosApp (XcodeGen)

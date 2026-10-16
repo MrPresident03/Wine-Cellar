@@ -2,7 +2,7 @@
 
 Two databases hold the same records:
 
-- **On the device:** SQLite (bundled), defined by `shared/data/src/commonMain/sqldelight/migrations/*.sqm`.
+- **On the device:** SQLite (bundled), defined by `shared/data/src/commonMain/sqldelight/com/houseofvino/data/db/*.sqm`.
 - **In the cloud:** Supabase Postgres, defined by `supabase/migrations/*.sql`.
 
 The device database is a superset: it adds device-only tables (outbox, cursors, conflicts, recent queries, search index) and device-only columns (photo file paths, movement sync state).

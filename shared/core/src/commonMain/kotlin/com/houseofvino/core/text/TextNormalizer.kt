@@ -95,7 +95,8 @@ object EditDistance {
             prev = cur
             cur = t
         }
-        return prev[b.length]
+        val d = prev[b.length]
+        return if (d > max) max + 1 else d
     }
 
     /** How many typos to forgive for a term of this length. */

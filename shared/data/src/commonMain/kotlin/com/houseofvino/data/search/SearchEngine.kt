@@ -281,8 +281,8 @@ class SearchEngine(private val store: Store) {
         if (f.drinkStatuses.isNotEmpty()) {
             sql.append(" AND ${drinkStatusSql(args, currentYear)} IN ${args.list(f.drinkStatuses.map { it.name })}")
         }
-        if (f.minRating100 != null) {
-            sql.append(" AND (SELECT MAX(n2.rating_100) FROM tasting_note n2 WHERE n2.vintage_id = v.id AND n2.deleted_at IS NULL) >= ${args.add(f.minRating100.toLong())}")
+        f.minRating100?.let { min ->
+            sql.append(" AND (SELECT MAX(n2.rating_100) FROM tasting_note n2 WHERE n2.vintage_id = v.id AND n2.deleted_at IS NULL) >= ${args.add(min.toLong())}")
         }
     }
 
@@ -332,7 +332,7 @@ class SearchEngine(private val store: Store) {
         if (filters.vintageFrom != null || filters.vintageTo != null) {
             from.append(" AND v.vintage_kind = 'year' AND v.vintage_year BETWEEN ${args.add((filters.vintageFrom ?: Vintage.MIN_YEAR).toLong())} AND ${args.add((filters.vintageTo ?: Vintage.MAX_YEAR).toLong())}")
         }
-        if (filters.minRating100 != null) from.append(" AND n.rating_100 >= ${args.add(filters.minRating100.toLong())}")
+        filters.minRating100?.let { min -> from.append(" AND n.rating_100 >= ${args.add(min.toLong())}") }
         if (filters.tagIds.isNotEmpty()) {
             from.append(" AND EXISTS (SELECT 1 FROM tag_link tl WHERE tl.deleted_at IS NULL AND tl.target_type = 'tasting' AND tl.target_id = n.id AND tl.tag_id IN ${args.list(filters.tagIds.toList())})")
         }

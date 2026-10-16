@@ -56,3 +56,8 @@ central org.jetbrains.compose.ui:ui-tooling-preview
 central org.jetbrains.compose.foundation:foundation
 central io.mockk:mockk
 central app.cash.turbine:turbine
+central org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3
+central org.jetbrains.androidx.navigation3:navigation3-runtime
+central org.jetbrains.compose.ui:ui-backhandler
+central org.jetbrains.androidx.navigationevent:navigationevent-compose
+central org.jetbrains.compose.material3.adaptive:adaptive-navigation3

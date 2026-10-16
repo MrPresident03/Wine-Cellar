@@ -32,7 +32,7 @@ Dependency injection is a hand-written `AppGraph` (constructor injection). It ke
 
 SQLDelight generates type-safe queries from SQL. Its stock Android driver uses the phone's system SQLite, which varies by OS version and does not reliably include FTS5. We ship SQLite inside the app instead (`androidx.sqlite:sqlite-bundled`) on Android, iOS and the JVM, through a small SQLDelight driver (`BundledSqlDriver`). Every platform and every test therefore runs the same SQLite build with FTS5 and JSON1. Cost: roughly 1–2 MB per Android ABI.
 
-- The schema is defined by numbered migrations (`migrations/N.sqm`), with `PRAGMA user_version` as the version. Creation and each migration run in one transaction.
+- The schema is defined by numbered migrations (`N.sqm` next to the `.sq` query files), with `PRAGMA user_version` as the version. Creation and each migration run in one transaction.
 - One connection guarded by a re-entrant lock; WAL mode; foreign keys on.
 - Dynamic search SQL is built in Kotlin with bound parameters only; all other SQL is compile-time checked by SQLDelight.
 
