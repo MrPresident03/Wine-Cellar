@@ -10,7 +10,7 @@ plugins {
 kotlin {
     android {
         namespace = "com.houseofvino.data"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 26
     }
     jvm {

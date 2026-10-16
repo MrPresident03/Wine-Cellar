@@ -61,6 +61,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Toolchain info
         run: |
+          # Kotlin 2.4.21 is tested by JetBrains with Xcode 26.4.
+          sudo xcode-select -s /Applications/Xcode_26.4.1.app
           ls -d /Applications/Xcode*.app | tee xcode.txt
           xcodebuild -version | tee -a xcode.txt
           xcrun simctl list devices available | grep -E 'iPhone' | head -5 | tee -a xcode.txt
@@ -71,7 +73,7 @@ jobs:
           set -o pipefail
           ./gradlew --stacktrace --continue \
             :shared:core:iosSimulatorArm64Test :shared:data:iosSimulatorArm64Test \
-            :shared:ui:linkDebugFrameworkIosSimulatorArm64 2>&1 | tee build.log
+            :shared:ui:iosSimulatorArm64Test :shared:ui:linkDebugFrameworkIosSimulatorArm64 2>&1 | tee build.log
       - name: Xcode build
         id: xcode
         if: steps.kotlin.outcome == 'success'
@@ -82,13 +84,29 @@ jobs:
           cd iosApp && xcodegen generate
           xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee ../xcode.log | grep -E 'error:|warning: .*HouseOfVino|BUILD (SUCCEEDED|FAILED)' || true
+            -derivedDataPath ../build/ios-derived CODE_SIGNING_ALLOWED=NO build 2>&1 | tee ../xcode.log | grep -E 'error:|warning: .*HouseOfVino|BUILD (SUCCEEDED|FAILED)' || true
           grep -q 'BUILD SUCCEEDED' ../xcode.log
+      - name: Launch in simulator and screenshot
+        id: launch
+        if: steps.xcode.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -x
+          APP=$(find build/ios-derived/Build/Products -name 'iosApp.app' -maxdepth 3 | head -1)
+          DEV=$(xcrun simctl list devices available | grep -E 'iPhone 17 Pro \(' | head -1 | grep -oE '[0-9A-F-]{36}')
+          xcrun simctl boot "$DEV"
+          xcrun simctl bootstatus "$DEV" -b
+          xcrun simctl install "$DEV" "$APP"
+          xcrun simctl launch "$DEV" com.houseofvino.app
+          sleep 12
+          mkdir -p build/screenshots/ios
+          xcrun simctl io "$DEV" screenshot build/screenshots/ios/launch.png
+          xcrun simctl spawn "$DEV" launchctl list | grep -q com.houseofvino.app && echo "app still running"
       - name: Collect results
         if: always()
         run: |
           cat xcode.log >> build.log 2>/dev/null || true
-          python3 tools/ci/collect.py ios build.log out xcode.txt
+          python3 tools/ci/collect.py ios build.log out xcode.txt 'build/screenshots/**/*.png'
       - name: Publish results
         if: always()
         env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }

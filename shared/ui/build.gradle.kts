@@ -11,7 +11,7 @@ plugins {
 kotlin {
     android {
         namespace = "com.houseofvino.ui"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 26
         androidResources { enable = true }
     }

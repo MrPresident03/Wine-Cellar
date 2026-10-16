@@ -36,6 +36,8 @@ targets:
         # PLACEHOLDER: choose the final bundle id before the first App Store upload. It can never change afterwards.
         PRODUCT_BUNDLE_IDENTIFIER: com.houseofvino.app
         TARGETED_DEVICE_FAMILY: "1,2"
+        # Kotlin/Native builds arm64 simulator and device slices only (no Intel simulators).
+        "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
         FRAMEWORK_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/../shared/ui/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"]
         OTHER_LDFLAGS: ["$(inherited)", "-framework", "HouseOfVino"]
         CODE_SIGN_STYLE: Automatic

@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.houseofvino.android"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         // PLACEHOLDER: choose the final application id before the first store upload. It can never change afterwards.
