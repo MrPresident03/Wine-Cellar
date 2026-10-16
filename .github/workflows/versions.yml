@@ -32,6 +32,15 @@ jobs:
             echo "$coord	stable: $stable	latest: $latest" >> out/versions.tsv
           done < tools/ci/artifacts.txt
           cat out/versions.tsv
+      - name: POM dependencies of key libraries
+        run: |
+          for c in io/github/jan-tennert/supabase/auth-kt/3.8.0/auth-kt-3.8.0.pom io/github/jan-tennert/supabase/supabase-kt/3.8.0/supabase-kt-3.8.0.pom com/eygraber/sqldelight-androidx-driver; do
+            echo "== $c" >> out/poms.txt
+            curl -fsSL "https://repo.maven.apache.org/maven2/$c" | grep -A2 -E '<artifactId>(ktor|kotlinx|sqlite|runtime)' | grep -E 'artifactId|version' | head -40 >> out/poms.txt || echo missing >> out/poms.txt
+          done
+          curl -fsSL https://repo.maven.apache.org/maven2/com/eygraber/sqldelight-androidx-driver/maven-metadata.xml | grep -o '<version>[^<]*' | tail -5 >> out/poms.txt || true
+          V=$(curl -fsSL https://repo.maven.apache.org/maven2/com/eygraber/sqldelight-androidx-driver/maven-metadata.xml | grep -o '<release>[^<]*' | sed 's/<release>//')
+          if [ -n "$V" ]; then curl -fsSL "https://repo.maven.apache.org/maven2/com/eygraber/sqldelight-androidx-driver/$V/sqldelight-androidx-driver-$V.module" | grep -E '"(group|module|version|requires)"' | sort -u | head -60 >> out/poms.txt; fi
       - name: Xcode and runner images
         run: |
           {

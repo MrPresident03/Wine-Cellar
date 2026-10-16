@@ -43,3 +43,16 @@ google androidx.work:work-runtime
 google androidx.compose.ui:ui-test-junit4
 google androidx.test.ext:junit
 plugins org.gradle.toolchains.foojay-resolver-convention:org.gradle.toolchains.foojay-resolver-convention.gradle.plugin
+google androidx.sqlite:sqlite-bundled
+google androidx.sqlite:sqlite
+central com.eygraber:sqldelight-androidx-driver
+central io.requery:sqlite-android
+central com.github.requery:sqlite-android
+central com.ionspin.kotlin:bignum
+central io.ktor:ktor-client-okhttp
+central io.ktor:ktor-client-darwin
+central io.github.jan-tennert.supabase:functions-kt
+central org.jetbrains.compose.ui:ui-tooling-preview
+central org.jetbrains.compose.foundation:foundation
+central io.mockk:mockk
+central app.cash.turbine:turbine
