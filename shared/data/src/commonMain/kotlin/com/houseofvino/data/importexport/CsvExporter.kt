@@ -48,7 +48,7 @@ class CsvExporter(private val store: Store, private val valuations: ValuationRep
             listOf(
                 "Producer", "Wine", "Vintage", "Style", "Country", "Region", "Sub-region", "Appellation", "Classification", "Grapes",
                 "Size", "Quantity", "Location", "Price per bottle", "Currency", "Purchase date", "Bought from", "Drink from", "Drink by",
-                "Estimated value per bottle", "Value currency", "Value source", "Value date", "Vintage ID", "Purchase ID",
+                "Estimated value per bottle", "Value currency", "Valued by", "Value date", "Vintage ID", "Purchase ID",
             ),
             rows,
         )

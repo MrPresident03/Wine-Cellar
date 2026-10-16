@@ -31,14 +31,17 @@ object DatabaseFactory {
             current == 0L -> database.transaction {
                 HouseOfVinoDatabase.Schema.create(driver)
                 driver.setUserVersion(target)
+                RawSchema.install(driver)
             }
             current < target -> database.transaction {
                 HouseOfVinoDatabase.Schema.migrate(driver, current, target)
                 driver.setUserVersion(target)
+                RawSchema.install(driver)
             }
             current > target -> throw IllegalStateException(
                 "This database was written by a newer version of House of Vino (schema $current, app supports $target). Update the app.",
             )
+            else -> database.transaction { RawSchema.install(driver) }
         }
     }
 }
