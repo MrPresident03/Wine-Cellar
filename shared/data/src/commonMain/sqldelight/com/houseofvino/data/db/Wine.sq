@@ -1,0 +1,36 @@
+insert:
+INSERT INTO wine(id, household_id, producer, name, style, country, region, sub_region, appellation, classification, grapes, notes, identity_key, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE wine SET
+    producer = :producer, name = :name, style = :style, country = :country, region = :region,
+    sub_region = :subRegion, appellation = :appellation, classification = :classification,
+    grapes = :grapes, notes = :notes, identity_key = :identityKey, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+softDelete:
+UPDATE wine SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM wine WHERE id = ?;
+
+byIdentityKey:
+SELECT * FROM wine WHERE household_id = ? AND identity_key = ? AND deleted_at IS NULL ORDER BY created_at;
+
+producerSuggestions:
+SELECT producer, count(*) AS wines
+FROM wine
+WHERE household_id = :householdId AND deleted_at IS NULL AND producer LIKE :prefix || '%' ESCAPE '\'
+GROUP BY producer
+ORDER BY wines DESC, producer
+LIMIT :limit;
+
+winesOfProducer:
+SELECT * FROM wine WHERE household_id = ? AND producer = ? AND deleted_at IS NULL ORDER BY name;
+
+distinctValues:
+SELECT DISTINCT country, region FROM wine WHERE household_id = ? AND deleted_at IS NULL;
+
+liveCount:
+SELECT count(*) FROM wine WHERE household_id = ? AND deleted_at IS NULL;

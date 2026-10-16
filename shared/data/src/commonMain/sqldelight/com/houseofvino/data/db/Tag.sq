@@ -1,0 +1,41 @@
+insert:
+INSERT INTO tag(id, household_id, name, name_key, color, created_at, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+rename:
+UPDATE tag SET name = :name, name_key = :nameKey, color = :color, updated_at = :now, updated_by = :by WHERE id = :id;
+
+softDelete:
+UPDATE tag SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM tag WHERE id = ?;
+
+byKey:
+SELECT * FROM tag WHERE household_id = ? AND name_key = ? AND deleted_at IS NULL;
+
+all:
+SELECT t.*, (SELECT count(*) FROM tag_link tl WHERE tl.tag_id = t.id AND tl.deleted_at IS NULL) AS uses
+FROM tag t WHERE t.household_id = ? AND t.deleted_at IS NULL ORDER BY t.name COLLATE NOCASE;
+
+insertLink:
+INSERT INTO tag_link(id, household_id, tag_id, target_type, target_id, created_at, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+linkFor:
+SELECT * FROM tag_link WHERE tag_id = ? AND target_type = ? AND target_id = ? AND deleted_at IS NULL;
+
+softDeleteLink:
+UPDATE tag_link SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+linksOfTag:
+SELECT * FROM tag_link WHERE tag_id = ? AND deleted_at IS NULL;
+
+tagsFor:
+SELECT t.* FROM tag t JOIN tag_link tl ON tl.tag_id = t.id
+WHERE tl.target_type = ? AND tl.target_id = ? AND tl.deleted_at IS NULL AND t.deleted_at IS NULL
+ORDER BY t.name COLLATE NOCASE;
+
+reassignTarget:
+UPDATE tag_link SET target_id = :newId, updated_at = :now, updated_by = :by WHERE target_type = :type AND target_id = :oldId AND deleted_at IS NULL;
+
+linkIdsForTarget:
+SELECT id FROM tag_link WHERE target_type = ? AND target_id = ? AND deleted_at IS NULL;

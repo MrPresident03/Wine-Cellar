@@ -1,0 +1,41 @@
+insert:
+INSERT INTO inventory_movement(id, household_id, lot_id, kind, quantity, from_location_id, to_location_id, occurred_at, recorded_at, recorded_by, device_id, price_minor, price_currency, counterparty, note, reverses_id, sync_state, rev)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+byId:
+SELECT * FROM inventory_movement WHERE id = ?;
+
+reversalsOf:
+SELECT * FROM inventory_movement WHERE reverses_id = ? AND sync_state <> 'rejected';
+
+setSyncState:
+UPDATE inventory_movement SET sync_state = :state, reject_reason = :reason, rev = :rev WHERE id = :id;
+
+forLot:
+SELECT * FROM inventory_movement WHERE lot_id = ? ORDER BY occurred_at, recorded_at;
+
+forVintage:
+SELECT m.*, l.format_ml, fl.name AS from_name, tl.name AS to_name
+FROM inventory_movement m
+JOIN lot l ON l.id = m.lot_id
+LEFT JOIN location fl ON fl.id = m.from_location_id
+LEFT JOIN location tl ON tl.id = m.to_location_id
+WHERE l.vintage_id = ?
+ORDER BY m.occurred_at DESC, m.recorded_at DESC;
+
+recent:
+SELECT m.*, l.vintage_id, l.format_ml
+FROM inventory_movement m JOIN lot l ON l.id = m.lot_id
+WHERE m.household_id = ?
+ORDER BY m.occurred_at DESC, m.recorded_at DESC
+LIMIT ?;
+
+-- Ledger sums per lot and location, for verifying stored balances.
+ledgerBalances:
+SELECT lot_id, location_id, sum(delta) AS qty, sync_state
+FROM (
+    SELECT lot_id, to_location_id AS location_id, quantity AS delta, sync_state FROM inventory_movement WHERE household_id = :householdId AND to_location_id IS NOT NULL AND sync_state <> 'rejected'
+    UNION ALL
+    SELECT lot_id, from_location_id AS location_id, -quantity AS delta, sync_state FROM inventory_movement WHERE household_id = :householdId AND from_location_id IS NOT NULL AND sync_state <> 'rejected'
+)
+GROUP BY lot_id, location_id, sync_state;

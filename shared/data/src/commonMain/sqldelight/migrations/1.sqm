@@ -472,6 +472,8 @@ CREATE TABLE sync_outbox (
     op TEXT NOT NULL CHECK (op IN ('upsert', 'movement', 'photo')),
     base_rev INTEGER NOT NULL DEFAULT 0,
     base_json TEXT,
+    -- Bumped on every local edit, so a push that raced with an edit doesn't drop the newer edit.
+    local_version INTEGER NOT NULL DEFAULT 1,
     attempts INTEGER NOT NULL DEFAULT 0,
     next_attempt_at INTEGER NOT NULL DEFAULT 0,
     last_error TEXT,

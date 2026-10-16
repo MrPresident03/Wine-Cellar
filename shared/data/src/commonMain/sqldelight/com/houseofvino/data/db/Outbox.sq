@@ -1,0 +1,41 @@
+insertMovement:
+INSERT INTO sync_outbox(op_id, household_id, entity, entity_id, op, base_rev, created_at) VALUES (?, ?, 'inventory_movement', ?, 'movement', 0, ?);
+
+insertPhoto:
+INSERT INTO sync_outbox(op_id, household_id, entity, entity_id, op, base_rev, created_at) VALUES (?, ?, 'photo', ?, 'photo', 0, ?);
+
+pendingUpsert:
+SELECT * FROM sync_outbox WHERE entity = ? AND entity_id = ? AND op = 'upsert';
+
+bumpVersion:
+UPDATE sync_outbox SET local_version = local_version + 1,
+    state = CASE WHEN state IN ('blocked', 'in_flight') THEN state ELSE 'queued' END,
+    next_attempt_at = CASE WHEN state = 'failed' THEN 0 ELSE next_attempt_at END
+WHERE entity = ? AND entity_id = ? AND op = 'upsert';
+
+ready:
+SELECT * FROM sync_outbox WHERE household_id = ? AND state IN ('queued', 'failed') AND next_attempt_at <= ? ORDER BY seq LIMIT ?;
+
+all:
+SELECT * FROM sync_outbox ORDER BY seq;
+
+count:
+SELECT count(*) FROM sync_outbox WHERE household_id = ? AND state <> 'blocked';
+
+markInFlight:
+UPDATE sync_outbox SET state = 'in_flight', attempts = attempts + 1 WHERE seq = ?;
+
+markFailed:
+UPDATE sync_outbox SET state = 'failed', last_error = :error, next_attempt_at = :nextAttemptAt WHERE seq = :seq;
+
+markBlocked:
+UPDATE sync_outbox SET state = 'blocked', last_error = :error WHERE seq = :seq;
+
+delete:
+DELETE FROM sync_outbox WHERE seq = ?;
+
+rebase:
+UPDATE sync_outbox SET base_rev = :baseRev, base_json = :baseJson, state = 'queued', next_attempt_at = 0, last_error = NULL WHERE seq = :seq;
+
+resetInFlight:
+UPDATE sync_outbox SET state = 'queued' WHERE state = 'in_flight';

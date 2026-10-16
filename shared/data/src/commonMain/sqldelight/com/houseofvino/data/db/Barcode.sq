@@ -1,0 +1,25 @@
+insert:
+INSERT INTO barcode_link(id, household_id, gtin, wine_id, vintage_id, format_ml, created_at, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+forGtin:
+SELECT b.*, w.producer, w.name, v.vintage_kind, v.vintage_year
+FROM barcode_link b
+JOIN wine w ON w.id = b.wine_id AND w.deleted_at IS NULL
+LEFT JOIN wine_vintage v ON v.id = b.vintage_id AND v.deleted_at IS NULL
+WHERE b.household_id = ? AND b.gtin = ? AND b.deleted_at IS NULL
+ORDER BY b.updated_at DESC;
+
+existing:
+SELECT * FROM barcode_link WHERE household_id = ? AND gtin = ? AND wine_id = ? AND vintage_id IS ? AND deleted_at IS NULL;
+
+reassignWine:
+UPDATE barcode_link SET wine_id = :wineId, updated_at = :now, updated_by = :by WHERE wine_id = :oldWineId AND deleted_at IS NULL;
+
+reassignVintage:
+UPDATE barcode_link SET vintage_id = :vintageId, wine_id = :wineId, updated_at = :now, updated_by = :by WHERE vintage_id = :oldVintageId AND deleted_at IS NULL;
+
+idsForWine:
+SELECT id FROM barcode_link WHERE wine_id = ?;
+
+idsForVintage:
+SELECT id FROM barcode_link WHERE vintage_id = ?;

@@ -1,0 +1,21 @@
+insert:
+INSERT INTO bottle_position(id, household_id, location_id, lot_id, row_index, col_index, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+softDelete:
+UPDATE bottle_position SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM bottle_position WHERE id = ?;
+
+inLocation:
+SELECT * FROM bottle_position WHERE location_id = ? AND deleted_at IS NULL ORDER BY row_index, col_index;
+
+forLotAt:
+SELECT * FROM bottle_position WHERE lot_id = ? AND location_id = ? AND deleted_at IS NULL ORDER BY created_at DESC;
+
+occupant:
+SELECT * FROM bottle_position WHERE location_id = ? AND row_index = ? AND col_index = ? AND deleted_at IS NULL;
+
+countForLotAt:
+SELECT count(*) FROM bottle_position WHERE lot_id = ? AND location_id = ? AND deleted_at IS NULL;

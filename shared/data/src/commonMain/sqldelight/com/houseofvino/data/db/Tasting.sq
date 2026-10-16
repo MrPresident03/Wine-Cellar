@@ -1,0 +1,41 @@
+insert:
+INSERT INTO tasting_note(id, household_id, vintage_id, lot_id, movement_id, author_id, tasted_on, rating_value, rating_scale, rating_100,
+    appearance, nose, palate, finish, conclusion, sweetness, acidity, tannin, body, intensity, aromas, notes, occasion, companions,
+    food_pairing, place, would_buy_again, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE tasting_note SET
+    tasted_on = :tastedOn, rating_value = :ratingValue, rating_scale = :ratingScale, rating_100 = :rating100,
+    appearance = :appearance, nose = :nose, palate = :palate, finish = :finish, conclusion = :conclusion,
+    sweetness = :sweetness, acidity = :acidity, tannin = :tannin, body = :body, intensity = :intensity,
+    aromas = :aromas, notes = :notes, occasion = :occasion, companions = :companions, food_pairing = :foodPairing,
+    place = :place, would_buy_again = :wouldBuyAgain, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+reassignVintage:
+UPDATE tasting_note SET vintage_id = :vintageId, updated_at = :now, updated_by = :by WHERE vintage_id = :oldVintageId AND deleted_at IS NULL;
+
+softDelete:
+UPDATE tasting_note SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM tasting_note WHERE id = ?;
+
+forVintage:
+SELECT * FROM tasting_note WHERE vintage_id = ? AND deleted_at IS NULL ORDER BY tasted_on DESC, created_at DESC;
+
+idsForVintage:
+SELECT id FROM tasting_note WHERE vintage_id = ?;
+
+timeline:
+SELECT n.*, w.producer, w.name AS wine_name, v.vintage_kind, v.vintage_year
+FROM tasting_note n
+JOIN wine_vintage v ON v.id = n.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE n.household_id = ? AND n.deleted_at IS NULL
+ORDER BY n.tasted_on DESC, n.created_at DESC
+LIMIT ? OFFSET ?;
+
+liveCount:
+SELECT count(*) FROM tasting_note WHERE household_id = ? AND deleted_at IS NULL;

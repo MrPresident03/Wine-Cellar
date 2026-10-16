@@ -1,0 +1,59 @@
+insert:
+INSERT INTO wishlist_item(id, household_id, wine_id, vintage_id, title, producer, wine_name, style, region, vintage_from, vintage_to,
+    accepts_nv, format_ml, desired_quantity, target_price_minor, max_price_minor, price_currency, priority, status, notes,
+    created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE wishlist_item SET
+    wine_id = :wineId, vintage_id = :vintageId, title = :title, producer = :producer, wine_name = :wineName, style = :style,
+    region = :region, vintage_from = :vintageFrom, vintage_to = :vintageTo, accepts_nv = :acceptsNv, format_ml = :formatMl,
+    desired_quantity = :desiredQuantity, target_price_minor = :targetPriceMinor, max_price_minor = :maxPriceMinor,
+    price_currency = :priceCurrency, priority = :priority, status = :status, notes = :notes, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+markAcquired:
+UPDATE wishlist_item SET status = 'acquired', acquired_lot_id = :lotId, wine_id = coalesce(wine_id, :wineId), vintage_id = coalesce(vintage_id, :vintageId), updated_at = :now, updated_by = :by WHERE id = :id;
+
+setStatus:
+UPDATE wishlist_item SET status = :status, updated_at = :now, updated_by = :by WHERE id = :id;
+
+softDelete:
+UPDATE wishlist_item SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM wishlist_item WHERE id = ?;
+
+active:
+SELECT * FROM wishlist_item WHERE household_id = ? AND deleted_at IS NULL AND status IN ('wanted', 'watching', 'ordered')
+ORDER BY priority, created_at DESC;
+
+all:
+SELECT * FROM wishlist_item WHERE household_id = ? AND deleted_at IS NULL ORDER BY priority, created_at DESC;
+
+reassignVintage:
+UPDATE wishlist_item SET vintage_id = :vintageId, wine_id = :wineId, updated_at = :now, updated_by = :by WHERE vintage_id = :oldVintageId AND deleted_at IS NULL;
+
+reassignWine:
+UPDATE wishlist_item SET wine_id = :wineId, updated_at = :now, updated_by = :by WHERE wine_id = :oldWineId AND deleted_at IS NULL;
+
+idsForVintage:
+SELECT id FROM wishlist_item WHERE vintage_id = ?;
+
+idsForWine:
+SELECT id FROM wishlist_item WHERE wine_id = ?;
+
+insertLink:
+INSERT INTO wishlist_link(id, household_id, item_id, merchant, url, last_price_minor, last_price_currency, price_seen_on, note, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateLink:
+UPDATE wishlist_link SET merchant = :merchant, url = :url, last_price_minor = :lastPriceMinor, last_price_currency = :lastPriceCurrency,
+    price_seen_on = :priceSeenOn, note = :note, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+softDeleteLink:
+UPDATE wishlist_link SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+linksFor:
+SELECT * FROM wishlist_link WHERE item_id = ? AND deleted_at IS NULL ORDER BY created_at;

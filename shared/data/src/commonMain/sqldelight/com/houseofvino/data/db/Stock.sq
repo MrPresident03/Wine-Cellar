@@ -1,0 +1,40 @@
+ensure:
+INSERT OR IGNORE INTO stock(lot_id, location_id, household_id, confirmed_qty, pending_delta) VALUES (?, ?, ?, 0, 0);
+
+addPending:
+UPDATE stock SET pending_delta = pending_delta + :delta WHERE lot_id = :lotId AND location_id = :locationId;
+
+addConfirmed:
+UPDATE stock SET confirmed_qty = confirmed_qty + :delta WHERE lot_id = :lotId AND location_id = :locationId;
+
+get:
+SELECT * FROM stock WHERE lot_id = ? AND location_id = ?;
+
+forLot:
+SELECT * FROM stock WHERE lot_id = ?;
+
+all:
+SELECT * FROM stock WHERE household_id = ?;
+
+holdingsForVintage:
+SELECT s.lot_id, s.location_id, s.confirmed_qty + s.pending_delta AS qty, l.format_ml, loc.name AS location_name, loc.grid_rows, loc.grid_cols
+FROM stock s
+JOIN lot l ON l.id = s.lot_id
+JOIN location loc ON loc.id = s.location_id
+WHERE l.vintage_id = ? AND s.confirmed_qty + s.pending_delta <> 0
+ORDER BY l.acquired_on, loc.name;
+
+contentsOfLocation:
+SELECT s.lot_id, s.confirmed_qty + s.pending_delta AS qty, l.vintage_id, l.format_ml
+FROM stock s JOIN lot l ON l.id = s.lot_id
+WHERE s.location_id = ? AND s.confirmed_qty + s.pending_delta > 0;
+
+negativeOrConflicting:
+SELECT * FROM stock WHERE household_id = ? AND confirmed_qty + pending_delta < 0;
+
+totals:
+SELECT
+    coalesce(sum(s.confirmed_qty + s.pending_delta), 0) AS bottles,
+    count(DISTINCT l.vintage_id) AS vintages
+FROM stock s JOIN lot l ON l.id = s.lot_id
+WHERE s.household_id = ? AND s.confirmed_qty + s.pending_delta > 0;

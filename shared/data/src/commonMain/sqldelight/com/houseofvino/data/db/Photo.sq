@@ -1,0 +1,21 @@
+insert:
+INSERT INTO photo(id, household_id, owner_type, owner_id, role, sort_order, width, height, byte_size, sha256, local_path, thumb_path, upload_state, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+softDelete:
+UPDATE photo SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+forOwner:
+SELECT * FROM photo WHERE owner_type = ? AND owner_id = ? AND deleted_at IS NULL ORDER BY sort_order, created_at;
+
+reassignOwner:
+UPDATE photo SET owner_id = :newId, updated_at = :now, updated_by = :by WHERE owner_type = :type AND owner_id = :oldId AND deleted_at IS NULL;
+
+setUploadState:
+UPDATE photo SET upload_state = :state, storage_path = coalesce(:storagePath, storage_path) WHERE id = :id;
+
+firstLabelPhoto:
+SELECT * FROM photo WHERE owner_type = 'vintage' AND owner_id = ? AND deleted_at IS NULL ORDER BY sort_order, created_at LIMIT 1;
+
+idsForOwner:
+SELECT id FROM photo WHERE owner_type = ? AND owner_id = ?;

@@ -1,0 +1,34 @@
+insert:
+INSERT INTO wine_vintage(id, household_id, wine_id, vintage_kind, vintage_year, alcohol_pct, drink_from, drink_to, drink_source, drink_note, notes, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE wine_vintage SET
+    vintage_kind = :kind, vintage_year = :year, alcohol_pct = :alcoholPct, drink_from = :drinkFrom, drink_to = :drinkTo,
+    drink_source = :drinkSource, drink_note = :drinkNote, notes = :notes, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+reassignWine:
+UPDATE wine_vintage SET wine_id = :wineId, updated_at = :now, updated_by = :by WHERE id = :id;
+
+softDelete:
+UPDATE wine_vintage SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM wine_vintage WHERE id = ?;
+
+forWine:
+SELECT * FROM wine_vintage WHERE wine_id = ? AND deleted_at IS NULL ORDER BY vintage_kind, vintage_year;
+
+matching:
+SELECT * FROM wine_vintage
+WHERE wine_id = :wineId AND deleted_at IS NULL AND vintage_kind = :kind AND (vintage_year IS :year)
+ORDER BY created_at;
+
+withWine:
+SELECT v.*, w.producer, w.name, w.style, w.country, w.region, w.sub_region, w.appellation, w.classification, w.grapes, w.notes AS wine_notes
+FROM wine_vintage v JOIN wine w ON w.id = v.wine_id
+WHERE v.id = ?;
+
+idsForWine:
+SELECT id FROM wine_vintage WHERE wine_id = ?;

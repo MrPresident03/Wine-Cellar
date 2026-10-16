@@ -1,0 +1,43 @@
+insert:
+INSERT INTO location(id, household_id, parent_id, kind, name, sort_order, grid_rows, grid_cols, notes, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE location SET
+    parent_id = :parentId, kind = :kind, name = :name, sort_order = :sortOrder, grid_rows = :gridRows, grid_cols = :gridCols,
+    notes = :notes, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+softDelete:
+UPDATE location SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM location WHERE id = ?;
+
+all:
+SELECT * FROM location WHERE household_id = ? AND deleted_at IS NULL ORDER BY sort_order, name;
+
+children:
+SELECT * FROM location WHERE parent_id = ? AND deleted_at IS NULL ORDER BY sort_order, name;
+
+subtreeIds:
+WITH RECURSIVE sub(id) AS (
+    SELECT id FROM location WHERE id = :rootId
+    UNION
+    SELECT l.id FROM location l JOIN sub ON l.parent_id = sub.id WHERE l.deleted_at IS NULL
+)
+SELECT id FROM sub;
+
+ancestorIds:
+WITH RECURSIVE up(id, parent_id, depth) AS (
+    SELECT id, parent_id, 0 FROM location WHERE id = :id
+    UNION ALL
+    SELECT l.id, l.parent_id, up.depth + 1 FROM location l JOIN up ON l.id = up.parent_id WHERE up.depth < 64
+)
+SELECT id FROM up ORDER BY depth DESC;
+
+bottleCounts:
+SELECT s.location_id, sum(s.confirmed_qty + s.pending_delta) AS bottles
+FROM stock s
+WHERE s.household_id = ?
+GROUP BY s.location_id;

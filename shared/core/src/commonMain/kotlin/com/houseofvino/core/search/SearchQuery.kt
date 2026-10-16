@@ -38,7 +38,8 @@ data class SearchFilters(
     val grapes: Set<String> = emptySet(),
     val vintageFrom: Int? = null,
     val vintageTo: Int? = null,
-    val includeNonVintage: Boolean = true,
+    /** When a vintage range is set, also include non-vintage wines. */
+    val includeNonVintage: Boolean = false,
     val formatsMl: Set<Int> = emptySet(),
     /** Matches the location or anything inside it. */
     val locationIds: Set<String> = emptySet(),
@@ -49,7 +50,7 @@ data class SearchFilters(
     val includeFormerlyOwned: Boolean = false,
 ) {
     val isEmpty: Boolean
-        get() = this == SearchFilters() || this == SearchFilters(includeNonVintage = true)
+        get() = activeCount == 0
 
     val activeCount: Int
         get() = listOf(

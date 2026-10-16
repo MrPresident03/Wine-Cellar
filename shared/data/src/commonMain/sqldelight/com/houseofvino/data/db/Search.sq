@@ -1,0 +1,48 @@
+docId:
+SELECT id FROM search_doc WHERE doc_type = ? AND doc_id = ?;
+
+insertDoc:
+INSERT INTO search_doc(household_id, doc_type, doc_id) VALUES (?, ?, ?);
+
+deleteDoc:
+DELETE FROM search_doc WHERE id = ?;
+
+insertFts:
+INSERT INTO search_fts(rowid, producer, name, vintage, region, grapes, tags, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteFts:
+DELETE FROM search_fts WHERE rowid = ?;
+
+clearHousehold:
+DELETE FROM search_doc WHERE household_id = ?;
+
+docCount:
+SELECT doc_type, count(*) FROM search_doc WHERE household_id = ? GROUP BY doc_type;
+
+touchRecent:
+INSERT INTO recent_query(household_id, scope, query_text, used_at) VALUES (?, ?, ?, ?)
+ON CONFLICT(household_id, scope, query_text) DO UPDATE SET used_at = excluded.used_at;
+
+recent:
+SELECT query_text, used_at FROM recent_query WHERE household_id = ? AND scope = ? ORDER BY used_at DESC LIMIT ?;
+
+trimRecent:
+DELETE FROM recent_query
+WHERE household_id = :householdId AND scope = :scope AND query_text NOT IN (
+    SELECT query_text FROM recent_query WHERE household_id = :householdId AND scope = :scope ORDER BY used_at DESC LIMIT :keep
+);
+
+clearRecent:
+DELETE FROM recent_query WHERE household_id = ? AND scope = ?;
+
+insertSaved:
+INSERT INTO saved_search(id, household_id, owner_id, name, query_json, sort_order, created_at, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+renameSaved:
+UPDATE saved_search SET name = :name, query_json = :queryJson, updated_at = :now, updated_by = :by WHERE id = :id;
+
+softDeleteSaved:
+UPDATE saved_search SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+saved:
+SELECT * FROM saved_search WHERE household_id = ? AND deleted_at IS NULL ORDER BY sort_order, name COLLATE NOCASE;

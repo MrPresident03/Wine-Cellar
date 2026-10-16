@@ -1,0 +1,25 @@
+insert:
+INSERT INTO lot(id, household_id, vintage_id, format_ml, quantity_acquired, unit_price_minor, price_currency, extra_costs_minor, acquired_on, source, source_ref, case_type, case_size, wishlist_item_id, notes, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateDetails:
+UPDATE lot SET
+    format_ml = :formatMl, unit_price_minor = :unitPriceMinor, price_currency = :priceCurrency, extra_costs_minor = :extraCostsMinor,
+    acquired_on = :acquiredOn, source = :source, source_ref = :sourceRef, case_type = :caseType, case_size = :caseSize,
+    notes = :notes, updated_at = :now, updated_by = :by
+WHERE id = :id;
+
+reassignVintage:
+UPDATE lot SET vintage_id = :vintageId, updated_at = :now, updated_by = :by WHERE id = :id;
+
+softDelete:
+UPDATE lot SET deleted_at = :now, updated_at = :now, updated_by = :by WHERE id = :id;
+
+byId:
+SELECT * FROM lot WHERE id = ?;
+
+forVintage:
+SELECT * FROM lot WHERE vintage_id = ? AND deleted_at IS NULL ORDER BY acquired_on, created_at;
+
+idsForVintage:
+SELECT id FROM lot WHERE vintage_id = ?;

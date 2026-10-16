@@ -35,7 +35,7 @@ jobs:
             :androidApp:assembleDebug 2>&1 | tee build.log
       - name: Collect results
         if: always()
-        run: python3 tools/ci/collect.py android-jvm build.log out 'build/screenshots/**/*.png'
+        run: python3 tools/ci/collect.py android-jvm build.log out 'build/screenshots/**/*.png' 'build/reports/houseofvino/*'
       - name: Publish results
         if: always()
         env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }

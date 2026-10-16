@@ -1,0 +1,18 @@
+insert:
+INSERT INTO household(id, name, home_currency, is_local_only, created_at, updated_at, updated_by)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+byId:
+SELECT * FROM household WHERE id = ?;
+
+all:
+SELECT * FROM household WHERE deleted_at IS NULL ORDER BY created_at;
+
+rename:
+UPDATE household SET name = :name, updated_at = :now, updated_by = :by WHERE id = :id;
+
+setHomeCurrency:
+UPDATE household SET home_currency = :currency, updated_at = :now, updated_by = :by WHERE id = :id;
+
+members:
+SELECT * FROM household_member WHERE household_id = ? ORDER BY joined_at;
