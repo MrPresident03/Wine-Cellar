@@ -33,7 +33,13 @@ jobs:
           done < tools/ci/artifacts.txt
           cat out/versions.tsv
       - name: Xcode and runner images
-        run: echo "ubuntu: $(lsb_release -ds); java: $(java -version 2>&1 | head -1); android sdk: $ANDROID_HOME $(ls $ANDROID_HOME/platforms 2>/dev/null | tr '\n' ' ') build-tools: $(ls $ANDROID_HOME/build-tools 2>/dev/null | tr '\n' ' ')" >> out/versions.tsv
+        run: |
+          {
+            echo "ubuntu: $(lsb_release -ds)"
+            echo "java: $(java -version 2>&1 | head -1)"
+            echo "android platforms: $(ls $ANDROID_HOME/platforms 2>/dev/null | tr '\n' ' ')"
+            echo "build-tools: $(ls $ANDROID_HOME/build-tools 2>/dev/null | tr '\n' ' ')"
+          } >> out/versions.tsv
       - name: Publish results to ci/versions branch
         run: |
           cd out && git init -q -b ci/versions && git add -A
