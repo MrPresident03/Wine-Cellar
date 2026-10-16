@@ -32,3 +32,6 @@ WHERE v.id = ?;
 
 idsForWine:
 SELECT id FROM wine_vintage WHERE wine_id = ?;
+
+yearRange:
+SELECT min(vintage_year) AS lo, max(vintage_year) AS hi FROM wine_vintage WHERE household_id = ? AND deleted_at IS NULL AND vintage_kind = 'year';

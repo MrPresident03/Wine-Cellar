@@ -19,3 +19,12 @@ SELECT * FROM bottle_position WHERE location_id = ? AND row_index = ? AND col_in
 
 countForLotAt:
 SELECT count(*) FROM bottle_position WHERE lot_id = ? AND location_id = ? AND deleted_at IS NULL;
+
+inLocationWithWine:
+SELECT p.id, p.lot_id, p.row_index, p.col_index, l.vintage_id, v.vintage_kind, v.vintage_year, w.producer, w.name, w.style
+FROM bottle_position p
+JOIN lot l ON l.id = p.lot_id
+JOIN wine_vintage v ON v.id = l.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE p.location_id = ? AND p.deleted_at IS NULL
+ORDER BY p.row_index, p.col_index;

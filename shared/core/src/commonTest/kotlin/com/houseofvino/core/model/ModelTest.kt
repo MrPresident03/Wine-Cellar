@@ -67,6 +67,16 @@ class ModelTest {
         assertEquals("750 ml", BottleFormat.label(750))
         assertEquals(20, BottleFormat.standardEquivalentTenths(1500))
         assertEquals(5, BottleFormat.standardEquivalentTenths(375))
+        assertEquals(750, BottleFormat.parse("750"))
+        assertEquals(750, BottleFormat.parse("750 ml"))
+        assertEquals(750, BottleFormat.parse("75cl"))
+        assertEquals(1500, BottleFormat.parse("1.5L"))
+        assertEquals(1500, BottleFormat.parse("1,5 l"))
+        assertEquals(1500, BottleFormat.parse("Magnum"))
+        assertEquals(375, BottleFormat.parse("half"))
+        assertEquals(3000, BottleFormat.parse("3"))
+        assertNull(BottleFormat.parse("big"))
+        assertNull(BottleFormat.parse("99999"))
     }
 
     @Test

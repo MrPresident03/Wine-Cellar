@@ -34,3 +34,6 @@ SELECT DISTINCT country, region FROM wine WHERE household_id = ? AND deleted_at 
 
 liveCount:
 SELECT count(*) FROM wine WHERE household_id = ? AND deleted_at IS NULL;
+
+facetSource:
+SELECT DISTINCT country, region, sub_region, appellation, grapes FROM wine WHERE household_id = ? AND deleted_at IS NULL;

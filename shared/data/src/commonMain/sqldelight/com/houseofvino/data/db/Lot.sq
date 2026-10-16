@@ -23,3 +23,7 @@ SELECT * FROM lot WHERE vintage_id = ? AND deleted_at IS NULL ORDER BY acquired_
 
 idsForVintage:
 SELECT id FROM lot WHERE vintage_id = ?;
+
+formatsInStock:
+SELECT DISTINCT l.format_ml FROM lot l JOIN stock s ON s.lot_id = l.id
+WHERE l.household_id = ? AND s.confirmed_qty + s.pending_delta > 0;

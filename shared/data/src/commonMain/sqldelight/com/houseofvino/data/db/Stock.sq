@@ -38,3 +38,13 @@ SELECT
     count(DISTINCT l.vintage_id) AS vintages
 FROM stock s JOIN lot l ON l.id = s.lot_id
 WHERE s.household_id = ? AND s.confirmed_qty + s.pending_delta > 0;
+
+contentsWithWine:
+SELECT s.lot_id, s.confirmed_qty + s.pending_delta AS qty, l.vintage_id, l.format_ml, v.vintage_kind, v.vintage_year, w.producer, w.name, w.style,
+    (SELECT count(*) FROM bottle_position p WHERE p.lot_id = s.lot_id AND p.location_id = s.location_id AND p.deleted_at IS NULL) AS placed
+FROM stock s
+JOIN lot l ON l.id = s.lot_id
+JOIN wine_vintage v ON v.id = l.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE s.location_id = ? AND s.confirmed_qty + s.pending_delta > 0
+ORDER BY w.producer COLLATE NOCASE, v.vintage_year;

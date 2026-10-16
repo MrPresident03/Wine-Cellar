@@ -27,6 +27,33 @@ object BottleFormat {
 
     fun isValid(ml: Int): Boolean = ml in 50..30000
 
+    /**
+     * Reads sizes as people and spreadsheets write them: "750", "750ml", "75cl", "1.5L", "1,5 l",
+     * "Magnum", "half". Returns null when it can't tell.
+     */
+    fun parse(text: String?): Int? {
+        val t = text?.trim()?.lowercase()?.replace(',', '.')?.replace(" ", "") ?: return null
+        if (t.isEmpty()) return null
+        NAMES[t]?.let { return it }
+        val m = Regex("""^(\d+(?:\.\d+)?)(ml|cl|l|ltr|litre|liter|litres|liters)?$""").find(t) ?: return null
+        val n = m.groupValues[1]
+        val unit = m.groupValues[2]
+        val ml = when (unit) {
+            "", "ml" -> n.toDoubleOrNull()?.let { if (it < 20) it * 1000 else it }
+            "cl" -> n.toDoubleOrNull()?.times(10)
+            else -> n.toDoubleOrNull()?.times(1000)
+        } ?: return null
+        val rounded = kotlin.math.round(ml).toInt()
+        return if (isValid(rounded)) rounded else null
+    }
+
+    private val NAMES = mapOf(
+        "piccolo" to 187, "split" to 187, "quarter" to 187, "half" to 375, "halfbottle" to 375, "demi" to 375,
+        "standard" to 750, "bottle" to 750, "magnum" to 1500, "doublemagnum" to 3000, "jeroboam" to 3000,
+        "rehoboam" to 4500, "imperial" to 6000, "methuselah" to 6000, "salmanazar" to 9000,
+        "balthazar" to 12000, "nebuchadnezzar" to 15000, "clavelin" to 620,
+    )
+
     fun name(ml: Int): String = NAMED.firstOrNull { it.ml == ml }?.name ?: "${label(ml)}"
 
     /** "750 ml", "1.5 L", "3 L". */

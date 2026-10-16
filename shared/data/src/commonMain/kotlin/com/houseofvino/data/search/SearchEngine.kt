@@ -172,67 +172,62 @@ class SearchEngine(private val store: Store) {
         val args = Args()
         val locationIds = f.locationIds.flatMap { store.db.locationQueries.subtreeIds(it).executeAsList() }.distinct()
         val sql = StringBuilder()
-        sql.append(
-            """
-            WITH holdings AS (
-                SELECT l.vintage_id AS vintage_id, l.format_ml AS format_ml, SUM(s.confirmed_qty + s.pending_delta) AS qty
-                FROM stock s JOIN lot l ON l.id = s.lot_id
-                WHERE s.household_id = ${args.add(session.householdId)}
-            """.trimIndent(),
-        )
-        if (locationIds.isNotEmpty()) sql.append(" AND s.location_id IN ${args.list(locationIds)}")
-        sql.append(
-            """
-                GROUP BY l.vintage_id, l.format_ml
-            ),
-            pv AS (
-                SELECT vintage_id, SUM(qty) AS bottles, GROUP_CONCAT(format_ml || ':' || qty, ',') AS formats
-                FROM holdings WHERE qty > 0 GROUP BY vintage_id
-            )
-            """.trimIndent(),
-        )
+        // Full-text matches first and materialised, so the planner drives the query from the (few)
+        // matching documents instead of re-running the MATCH for every vintage.
         if (expr != null) {
             sql.append(
-                """,
-                m AS (
-                    SELECT d.doc_id AS vid, bm25(search_fts, 10.0, 8.0, 4.0, 3.0, 3.0, 2.0, 1.0) AS score
-                    FROM search_fts JOIN search_doc d ON d.id = search_fts.rowid
-                    WHERE search_fts MATCH ${args.add(expr)} AND d.doc_type = 'vintage' AND d.household_id = ${args.add(session.householdId)}
-                )
-                """.trimIndent(),
+                "WITH m AS MATERIALIZED (" +
+                    "SELECT d.doc_id AS vid, bm25(search_fts, 10.0, 8.0, 4.0, 3.0, 3.0, 2.0, 1.0) AS score " +
+                    "FROM search_fts JOIN search_doc d ON d.id = search_fts.rowid " +
+                    "WHERE search_fts MATCH ${args.add(expr)} AND d.doc_type = 'vintage' AND d.household_id = ${args.add(session.householdId)}), ",
             )
-        }
-        val from = StringBuilder()
-        from.append(" FROM wine_vintage v JOIN wine w ON w.id = v.wine_id LEFT JOIN pv ON pv.vintage_id = v.id")
-        if (expr != null) from.append(" JOIN m ON m.vid = v.id")
-        from.append(" WHERE v.household_id = ${args.add(session.householdId)} AND v.deleted_at IS NULL AND w.deleted_at IS NULL")
-        if (f.includeFormerlyOwned && locationIds.isEmpty()) {
-            from.append(" AND (pv.bottles > 0 OR EXISTS (SELECT 1 FROM lot lo WHERE lo.vintage_id = v.id))")
         } else {
-            from.append(" AND pv.bottles > 0")
+            sql.append("WITH ")
         }
-        appendWineFilters(from, args, f, currentYear)
-        if (f.formatsMl.isNotEmpty()) {
-            from.append(" AND EXISTS (SELECT 1 FROM holdings h WHERE h.vintage_id = v.id AND h.qty > 0 AND h.format_ml IN ${args.list(f.formatsMl.map { it.toLong() })})")
-        }
-
-        // Count first (same CTEs and WHERE), then the page.
-        val countArgs = args.copy()
-        val countSql = "$sql SELECT COUNT(*), COALESCE(SUM(pv.bottles), 0) $from"
-        val (total, bottles) = queryList(countSql, countArgs.values) { (it.getLong(0) ?: 0L) to (it.getLong(1) ?: 0L) }.first()
-
-        val select = StringBuilder()
-        select.append(
-            """
-             SELECT v.id, w.id, w.producer, w.name, w.classification, w.style, w.country, w.region, w.appellation,
-                    v.vintage_kind, v.vintage_year, v.drink_from, v.drink_to, COALESCE(pv.bottles, 0), pv.formats,
-                    (SELECT MAX(n.rating_100) FROM tasting_note n WHERE n.vintage_id = v.id AND n.deleted_at IS NULL) AS best_rating
-            """.trimIndent(),
+        sql.append(
+            "holdings AS MATERIALIZED (" +
+                "SELECT l.vintage_id AS vintage_id, l.format_ml AS format_ml, SUM(s.confirmed_qty + s.pending_delta) AS qty " +
+                "FROM stock s JOIN lot l ON l.id = s.lot_id " +
+                "WHERE s.household_id = ${args.add(session.householdId)}",
         )
-        select.append(from)
-        select.append(" ORDER BY ").append(orderBy(sort, expr != null))
-        select.append(" LIMIT ${args.add(limit.toLong())} OFFSET ${args.add(offset.toLong())}")
-        val rows = queryList("$sql$select", args.values) { c ->
+        if (locationIds.isNotEmpty()) sql.append(" AND s.location_id IN ${args.list(locationIds)}")
+        if (expr != null) sql.append(" AND l.vintage_id IN (SELECT vid FROM m)")
+        sql.append(
+            " GROUP BY l.vintage_id, l.format_ml), " +
+                "pv AS MATERIALIZED (" +
+                "SELECT vintage_id, SUM(qty) AS bottles, GROUP_CONCAT(format_ml || ':' || qty, ',') AS formats " +
+                "FROM holdings WHERE qty > 0 GROUP BY vintage_id) ",
+        )
+        sql.append(
+            "SELECT v.id, w.id, w.producer, w.name, w.classification, w.style, w.country, w.region, w.appellation, " +
+                "v.vintage_kind, v.vintage_year, v.drink_from, v.drink_to, COALESCE(pv.bottles, 0), pv.formats, " +
+                "(SELECT MAX(n.rating_100) FROM tasting_note n WHERE n.vintage_id = v.id AND n.deleted_at IS NULL) AS best_rating, " +
+                "COUNT(*) OVER () AS total_rows, SUM(COALESCE(pv.bottles, 0)) OVER () AS total_bottles ",
+        )
+        if (expr != null) {
+            sql.append("FROM m CROSS JOIN wine_vintage v ON v.id = m.vid ")
+        } else {
+            sql.append("FROM wine_vintage v ")
+        }
+        sql.append("JOIN wine w ON w.id = v.wine_id LEFT JOIN pv ON pv.vintage_id = v.id")
+        sql.append(" WHERE v.household_id = ${args.add(session.householdId)} AND v.deleted_at IS NULL AND w.deleted_at IS NULL")
+        if (f.includeFormerlyOwned && locationIds.isEmpty()) {
+            sql.append(" AND (pv.bottles > 0 OR EXISTS (SELECT 1 FROM lot lo WHERE lo.vintage_id = v.id))")
+        } else {
+            sql.append(" AND pv.bottles > 0")
+        }
+        appendWineFilters(sql, args, f, currentYear)
+        if (f.formatsMl.isNotEmpty()) {
+            sql.append(" AND EXISTS (SELECT 1 FROM holdings h WHERE h.vintage_id = v.id AND h.qty > 0 AND h.format_ml IN ${args.list(f.formatsMl.map { it.toLong() })})")
+        }
+        sql.append(" ORDER BY ").append(orderBy(sort, expr != null))
+        sql.append(" LIMIT ${args.add(limit.toLong())} OFFSET ${args.add(offset.toLong())}")
+
+        var total = 0L
+        var bottles = 0L
+        val rows = queryList(sql.toString(), args.values) { c ->
+            total = c.getLong(16) ?: 0L
+            bottles = c.getLong(17) ?: 0L
             CellarRow(
                 vintageId = c.getString(0)!!,
                 wineId = c.getString(1)!!,
@@ -250,6 +245,11 @@ class SearchEngine(private val store: Store) {
                 formats = parseFormats(c.getString(14)),
                 bestRating100 = c.getLong(15)?.toInt(),
             )
+        }
+        // Past the last page the window totals aren't available; count separately (rare).
+        if (rows.isEmpty() && offset > 0) {
+            val again = runCellar(session, expr, f, sort, 0, 1, currentYear)
+            return SearchPage(emptyList(), again.total, again.bottles, offset = offset)
         }
         return SearchPage(rows, total.toInt(), bottles.toInt(), offset = offset)
     }
@@ -318,13 +318,15 @@ class SearchEngine(private val store: Store) {
         val sql = StringBuilder()
         if (expr != null) {
             sql.append(
-                "WITH m AS (SELECT d.doc_id AS nid, bm25(search_fts, 6.0, 6.0, 3.0, 2.0, 2.0, 2.0, 1.0) AS score " +
+                "WITH m AS MATERIALIZED (SELECT d.doc_id AS nid, bm25(search_fts, 6.0, 6.0, 3.0, 2.0, 2.0, 2.0, 1.0) AS score " +
                     "FROM search_fts JOIN search_doc d ON d.id = search_fts.rowid " +
                     "WHERE search_fts MATCH ${args.add(expr)} AND d.doc_type = 'tasting' AND d.household_id = ${args.add(session.householdId)}) ",
             )
         }
-        val from = StringBuilder(" FROM tasting_note n JOIN wine_vintage v ON v.id = n.vintage_id JOIN wine w ON w.id = v.wine_id")
-        if (expr != null) from.append(" JOIN m ON m.nid = n.id")
+        val from = StringBuilder(
+            if (expr != null) " FROM m CROSS JOIN tasting_note n ON n.id = m.nid JOIN wine_vintage v ON v.id = n.vintage_id JOIN wine w ON w.id = v.wine_id"
+            else " FROM tasting_note n JOIN wine_vintage v ON v.id = n.vintage_id JOIN wine w ON w.id = v.wine_id",
+        )
         from.append(" WHERE n.household_id = ${args.add(session.householdId)} AND n.deleted_at IS NULL")
         val filters = if (inlineFrom != null) f.copy(vintageFrom = inlineFrom, vintageTo = inlineTo) else f
         if (filters.styles.isNotEmpty()) from.append(" AND w.style IN ${args.list(filters.styles.map { it.code })}")
@@ -368,13 +370,15 @@ class SearchEngine(private val store: Store) {
         val sql = StringBuilder()
         if (expr != null) {
             sql.append(
-                "WITH m AS (SELECT d.doc_id AS iid, bm25(search_fts, 8.0, 8.0, 3.0, 3.0, 2.0, 2.0, 1.0) AS score " +
+                "WITH m AS MATERIALIZED (SELECT d.doc_id AS iid, bm25(search_fts, 8.0, 8.0, 3.0, 3.0, 2.0, 2.0, 1.0) AS score " +
                     "FROM search_fts JOIN search_doc d ON d.id = search_fts.rowid " +
                     "WHERE search_fts MATCH ${args.add(expr)} AND d.doc_type = 'wishlist' AND d.household_id = ${args.add(session.householdId)}) ",
             )
         }
-        val from = StringBuilder(" FROM wishlist_item i LEFT JOIN wine w ON w.id = i.wine_id")
-        if (expr != null) from.append(" JOIN m ON m.iid = i.id")
+        val from = StringBuilder(
+            if (expr != null) " FROM m CROSS JOIN wishlist_item i ON i.id = m.iid LEFT JOIN wine w ON w.id = i.wine_id"
+            else " FROM wishlist_item i LEFT JOIN wine w ON w.id = i.wine_id",
+        )
         from.append(" WHERE i.household_id = ${args.add(session.householdId)} AND i.deleted_at IS NULL")
         if (!includeClosed) from.append(" AND i.status IN ('wanted', 'watching', 'ordered')")
         if (f.styles.isNotEmpty()) from.append(" AND COALESCE(w.style, i.style) IN ${args.list(f.styles.map { it.code })}")
