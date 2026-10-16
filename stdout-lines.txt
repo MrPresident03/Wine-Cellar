@@ -1,0 +1,16 @@
+== shared/data/build/test-results/jvmTest/TEST-com.houseofvino.data.SearchPerformanceTest.xml
+Generated 20001 vintages / 59634 bottles in 28.988604125s
+Search timings on 20,000 vintages (median of 9 runs, first 50 results + count):
+  first page, no text        154.6 ms  (20001 matches)
+  prefix 'chat'               53.8 ms  (1991 matches)
+  two terms                   13.7 ms  (191 matches)
+  term + year                  5.0 ms  (10 matches)
+  typo 'barossaa'             81.3 ms  (1925 matches)
+  accent 'donnhoff'           19.9 ms  (1052 matches)
+  filters                    116.9 ms  (141 matches)
+  text + filters + sort       21.0 ms  (227 matches)
+  sort by drink-by           135.9 ms  (20001 matches)
+== shared/data/build/test-results/jvmTest/TEST-com.houseofvino.data.DatabaseSmokeTest.xml
+Bundled SQLite version: 3.50.1
+== shared/data/build/test-results/jvmTest/TEST-com.houseofvino.data.InventoryRepositoryTest.xml
+random ledger test: 278 movements, 308 rejected attempts
