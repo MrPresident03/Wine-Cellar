@@ -161,6 +161,7 @@ class InventoryRepositoryTest {
         val keys = fromLedger.keys + stored.keys
         keys.forEach { k -> assertEquals(fromLedger[k] ?: 0L, stored[k] ?: 0L, "balance for $k") }
         assertTrue(stored.values.all { it >= 0 }, "no negative balances")
+        assertHoldingsConsistent()
         assertTrue(db.stockQueries.negativeOrConflicting(session.householdId).executeAsList().isEmpty())
         // Positions never outnumber bottles.
         places.forEach { loc ->

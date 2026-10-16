@@ -63,6 +63,7 @@ class WineRepositoryTest {
         assertEquals(0, inventory.holdings(a).sumOf { it.quantity })
         wines.mergeVintages(session, a, b, confirmDifferentVintages = true)
         assertEquals(3, inventory.holdings(a).sumOf { it.quantity })
+        assertHoldingsConsistent()
         assertTrue(wines.vintage(b)!!.deleted)
     }
 
@@ -82,6 +83,7 @@ class WineRepositoryTest {
         assertEquals(3, inventory.holdings(k15).sumOf { it.quantity })
         assertEquals(d16, vintages.last().id) // moved, not merged
         assertTrue(wines.wine(dupe)!!.deleted)
+        assertHoldingsConsistent()
     }
 
     @Test

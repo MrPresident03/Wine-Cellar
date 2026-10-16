@@ -201,6 +201,50 @@ CREATE TABLE stock (
 CREATE INDEX stock_location ON stock(location_id);
 CREATE INDEX stock_household ON stock(household_id);
 
+-- Bottles per vintage and size, kept in step with stock by triggers so the cellar list and
+-- insights don't have to add up every stock row on each query.
+CREATE TABLE vintage_holding (
+    vintage_id TEXT NOT NULL,
+    format_ml INTEGER NOT NULL,
+    household_id TEXT NOT NULL,
+    qty INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (vintage_id, format_ml)
+);
+CREATE INDEX vintage_holding_household ON vintage_holding(household_id, vintage_id);
+
+CREATE TRIGGER stock_insert_holding AFTER INSERT ON stock
+BEGIN
+    INSERT OR IGNORE INTO vintage_holding(vintage_id, format_ml, household_id, qty)
+        SELECT l.vintage_id, l.format_ml, NEW.household_id, 0 FROM lot l WHERE l.id = NEW.lot_id;
+    UPDATE vintage_holding SET qty = qty + NEW.confirmed_qty + NEW.pending_delta
+    WHERE vintage_id = (SELECT l.vintage_id FROM lot l WHERE l.id = NEW.lot_id)
+      AND format_ml = (SELECT l.format_ml FROM lot l WHERE l.id = NEW.lot_id);
+END;
+
+CREATE TRIGGER stock_update_holding AFTER UPDATE OF confirmed_qty, pending_delta ON stock
+BEGIN
+    UPDATE vintage_holding SET qty = qty + (NEW.confirmed_qty + NEW.pending_delta) - (OLD.confirmed_qty + OLD.pending_delta)
+    WHERE vintage_id = (SELECT l.vintage_id FROM lot l WHERE l.id = NEW.lot_id)
+      AND format_ml = (SELECT l.format_ml FROM lot l WHERE l.id = NEW.lot_id);
+END;
+
+CREATE TRIGGER stock_delete_holding AFTER DELETE ON stock
+BEGIN
+    UPDATE vintage_holding SET qty = qty - (OLD.confirmed_qty + OLD.pending_delta)
+    WHERE vintage_id = (SELECT l.vintage_id FROM lot l WHERE l.id = OLD.lot_id)
+      AND format_ml = (SELECT l.format_ml FROM lot l WHERE l.id = OLD.lot_id);
+END;
+
+CREATE TRIGGER lot_move_holding AFTER UPDATE OF vintage_id, format_ml ON lot
+WHEN OLD.vintage_id <> NEW.vintage_id OR OLD.format_ml <> NEW.format_ml
+BEGIN
+    UPDATE vintage_holding SET qty = qty - (SELECT coalesce(sum(s.confirmed_qty + s.pending_delta), 0) FROM stock s WHERE s.lot_id = NEW.id)
+    WHERE vintage_id = OLD.vintage_id AND format_ml = OLD.format_ml;
+    INSERT OR IGNORE INTO vintage_holding(vintage_id, format_ml, household_id, qty) VALUES (NEW.vintage_id, NEW.format_ml, NEW.household_id, 0);
+    UPDATE vintage_holding SET qty = qty + (SELECT coalesce(sum(s.confirmed_qty + s.pending_delta), 0) FROM stock s WHERE s.lot_id = NEW.id)
+    WHERE vintage_id = NEW.vintage_id AND format_ml = NEW.format_ml;
+END;
+
 -- Optional exact positions in gridded locations (racks). At most one bottle per slot.
 CREATE TABLE bottle_position (
     id TEXT NOT NULL PRIMARY KEY,

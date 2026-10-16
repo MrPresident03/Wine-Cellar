@@ -1,0 +1,22 @@
+holdings:
+SELECT s.location_id, s.confirmed_qty + s.pending_delta AS qty,
+       l.id AS lot_id, l.format_ml, l.unit_price_minor, l.price_currency,
+       v.id AS vintage_id, v.vintage_kind, v.vintage_year, v.drink_from, v.drink_to,
+       w.id AS wine_id, w.producer, w.name, w.style, w.country, w.region, w.grapes
+FROM stock s
+JOIN lot l ON l.id = s.lot_id
+JOIN wine_vintage v ON v.id = l.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE s.household_id = ? AND s.confirmed_qty + s.pending_delta > 0;
+
+spending:
+SELECT l.price_currency, l.unit_price_minor, l.quantity_acquired, l.extra_costs_minor
+FROM lot l
+WHERE l.household_id = ? AND l.deleted_at IS NULL AND l.price_currency IS NOT NULL;
+
+outgoing:
+SELECT m.kind, m.quantity, m.occurred_at
+FROM inventory_movement m
+WHERE m.household_id = :householdId AND m.occurred_at >= :since AND m.sync_state <> 'rejected'
+  AND m.kind IN ('consume', 'sell', 'gift_out', 'loss')
+  AND NOT EXISTS (SELECT 1 FROM inventory_movement r WHERE r.reverses_id = m.id AND r.sync_state <> 'rejected');

@@ -54,6 +54,27 @@ class TestEnv(startMillis: Long = 1_790_000_000_000L) {
         driver.executeQuery(null, sql, { c -> QueryResult.Value(if (c.next().value) c.getLong(0) ?: 0L else 0L) }, 0).value
 
     fun outboxCount(): Long = scalarLong("SELECT count(*) FROM sync_outbox")
+
+    /** The trigger-maintained per-vintage totals must equal the sum of stock rows. */
+    fun assertHoldingsConsistent() {
+        val drift = scalarLong(
+            """
+            SELECT count(*) FROM (
+                SELECT l.vintage_id, l.format_ml, sum(s.confirmed_qty + s.pending_delta) AS q
+                FROM stock s JOIN lot l ON l.id = s.lot_id GROUP BY l.vintage_id, l.format_ml
+            ) a
+            LEFT JOIN vintage_holding h ON h.vintage_id = a.vintage_id AND h.format_ml = a.format_ml
+            WHERE coalesce(h.qty, 0) <> a.q
+            """.trimIndent(),
+        ) + scalarLong(
+            """
+            SELECT count(*) FROM vintage_holding h WHERE h.qty <> 0 AND NOT EXISTS (
+                SELECT 1 FROM stock s JOIN lot l ON l.id = s.lot_id WHERE l.vintage_id = h.vintage_id AND l.format_ml = h.format_ml
+            )
+            """.trimIndent(),
+        )
+        kotlin.test.assertEquals(0L, drift, "vintage_holding drifted from stock")
+    }
     fun movementCount(): Long = scalarLong("SELECT count(*) FROM inventory_movement")
 }
 

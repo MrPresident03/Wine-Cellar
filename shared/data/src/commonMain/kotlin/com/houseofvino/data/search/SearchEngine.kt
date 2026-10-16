@@ -184,17 +184,26 @@ class SearchEngine(private val store: Store) {
         } else {
             sql.append("WITH ")
         }
+        if (locationIds.isEmpty()) {
+            // Fast path: per-vintage totals maintained by triggers.
+            sql.append(
+                "holdings AS MATERIALIZED (" +
+                    "SELECT vintage_id, format_ml, qty FROM vintage_holding WHERE household_id = ${args.add(session.householdId)}",
+            )
+            if (expr != null) sql.append(" AND vintage_id IN (SELECT vid FROM m)")
+            sql.append("), ")
+        } else {
+            sql.append(
+                "holdings AS MATERIALIZED (" +
+                    "SELECT l.vintage_id AS vintage_id, l.format_ml AS format_ml, SUM(s.confirmed_qty + s.pending_delta) AS qty " +
+                    "FROM stock s JOIN lot l ON l.id = s.lot_id " +
+                    "WHERE s.household_id = ${args.add(session.householdId)} AND s.location_id IN ${args.list(locationIds)}",
+            )
+            if (expr != null) sql.append(" AND l.vintage_id IN (SELECT vid FROM m)")
+            sql.append(" GROUP BY l.vintage_id, l.format_ml), ")
+        }
         sql.append(
-            "holdings AS MATERIALIZED (" +
-                "SELECT l.vintage_id AS vintage_id, l.format_ml AS format_ml, SUM(s.confirmed_qty + s.pending_delta) AS qty " +
-                "FROM stock s JOIN lot l ON l.id = s.lot_id " +
-                "WHERE s.household_id = ${args.add(session.householdId)}",
-        )
-        if (locationIds.isNotEmpty()) sql.append(" AND s.location_id IN ${args.list(locationIds)}")
-        if (expr != null) sql.append(" AND l.vintage_id IN (SELECT vid FROM m)")
-        sql.append(
-            " GROUP BY l.vintage_id, l.format_ml), " +
-                "pv AS MATERIALIZED (" +
+            "pv AS MATERIALIZED (" +
                 "SELECT vintage_id, SUM(qty) AS bottles, GROUP_CONCAT(format_ml || ':' || qty, ',') AS formats " +
                 "FROM holdings WHERE qty > 0 GROUP BY vintage_id) ",
         )

@@ -1,0 +1,30 @@
+inventory:
+SELECT w.producer, w.name, w.style, w.country, w.region, w.sub_region, w.appellation, w.classification, w.grapes,
+       v.id AS vintage_id, v.vintage_kind, v.vintage_year, v.drink_from, v.drink_to,
+       l.id AS lot_id, l.format_ml, l.unit_price_minor, l.price_currency, l.acquired_on, l.source,
+       s.location_id, s.confirmed_qty + s.pending_delta AS qty
+FROM stock s
+JOIN lot l ON l.id = s.lot_id
+JOIN wine_vintage v ON v.id = l.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE s.household_id = ? AND s.confirmed_qty + s.pending_delta > 0
+ORDER BY w.producer COLLATE NOCASE, w.name COLLATE NOCASE, v.vintage_year, l.format_ml;
+
+tastings:
+SELECT n.*, w.producer, w.name, v.vintage_kind, v.vintage_year
+FROM tasting_note n
+JOIN wine_vintage v ON v.id = n.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE n.household_id = ? AND n.deleted_at IS NULL
+ORDER BY n.tasted_on, n.created_at;
+
+financial:
+SELECT m.id, m.kind, m.quantity, m.occurred_at, m.price_minor, m.price_currency, m.counterparty, m.note, m.reverses_id, m.sync_state,
+       l.format_ml, l.unit_price_minor, l.price_currency AS lot_currency, l.extra_costs_minor, l.source,
+       w.producer, w.name, v.vintage_kind, v.vintage_year
+FROM inventory_movement m
+JOIN lot l ON l.id = m.lot_id
+JOIN wine_vintage v ON v.id = l.vintage_id
+JOIN wine w ON w.id = v.wine_id
+WHERE m.household_id = ? AND m.sync_state <> 'rejected'
+ORDER BY m.occurred_at, m.recorded_at;

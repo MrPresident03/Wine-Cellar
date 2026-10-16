@@ -68,7 +68,8 @@ class FlowsTest {
         setContent { Screenshots.Host { HouseOfVinoApp(seeded.graph, ThemeMode.DARK, nav) } }
         waitUntil(timeoutMillis = 10_000) { existsDesc("Search") }
         onNodeWithContentDescription("Search").performTextInput("giacossa")
-        waitUntil(timeoutMillis = 10_000) { exists("Bruno Giacosa") }
+        // Rows are read as one sentence, so match the row's description rather than its texts.
+        waitUntil(timeoutMillis = 10_000) { existsDesc("Bruno Giacosa") }
         waitUntil(timeoutMillis = 10_000) { exists("Including giacosa") }
     }
 }
