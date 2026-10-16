@@ -1,5 +1,6 @@
 package com.houseofvino.ui.components
 
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -194,7 +195,7 @@ fun StatusMark(status: DrinkStatus, modifier: Modifier = Modifier, showUnknown: 
 
 /** A filter/sort chip. Selected chips carry the burgundy accent. */
 @Composable
-fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, trailingCount: Int? = null) {
+fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, trailingCount: Int? = null, role: Role = Role.Checkbox) {
     val c = Hov.colors
     Row(
         modifier
@@ -202,12 +203,12 @@ fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifie
             .clip(RoundedCornerShape(18.dp))
             .background(if (selected) c.burgundy else c.surface)
             .border(1.dp, if (selected) c.burgundy else c.hairline, RoundedCornerShape(18.dp))
-            .clickable(role = Role.Checkbox, onClick = onClick)
-            .semantics { contentDescription = if (selected) "$text, selected" else text }
+            .selectable(selected = selected, role = role, onClick = onClick)
+            .semantics { contentDescription = text }
             .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text, style = Hov.type.label, color = if (selected) c.onBurgundy else c.ink)
+        Text(text, style = Hov.type.label, color = if (selected) c.onBurgundy else c.ink, maxLines = 1, softWrap = false)
         if (trailingCount != null && trailingCount > 0) {
             Spacer(Modifier.width(6.dp))
             Text("$trailingCount", style = Hov.type.figure, color = if (selected) c.onBurgundy else c.burgundyBright)

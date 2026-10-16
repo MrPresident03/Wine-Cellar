@@ -63,6 +63,7 @@ import com.houseofvino.ui.components.StatusMark
 import com.houseofvino.ui.components.TextAction
 import com.houseofvino.ui.components.VintageFigure
 import com.houseofvino.ui.format.Fmt
+import com.houseofvino.ui.format.MovementText
 import com.houseofvino.ui.nav.AddWinePrefill
 import com.houseofvino.ui.nav.LocalNavigator
 import com.houseofvino.ui.nav.Route
@@ -279,25 +280,27 @@ private fun VintageContent(
 fun MovementLine(m: MovementRecord, page: VintagePage, canUndo: Boolean, onUndo: (String) -> Unit) {
     val c = Hov.colors
     val graph = LocalGraph.current
-    val from = m.fromLocationId
-    val to = m.toLocationId
-    val where = when {
-        from != null && to != null -> "${placeName(from, page)} → ${placeName(to, page)}"
-        to != null -> "into ${placeName(to, page)}"
-        from != null -> "from ${placeName(from, page)}"
-        else -> ""
+    val sentence = remember(m, page) {
+        fun line(r: MovementRecord) = MovementText.Line(
+            kind = r.kind,
+            quantity = r.quantity,
+            formatMl = page.lots.firstOrNull { it.id == r.lotId }?.formatMl,
+            from = r.fromLocationId?.let { placeName(it, page) },
+            to = r.toLocationId?.let { placeName(it, page) },
+        )
+        MovementText.sentence(line(m), m.reversesId?.let { id -> page.history.firstOrNull { it.id == id } }?.let(::line))
     }
     Column(Modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.s), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("${m.kind.label} ${m.quantity}  $where", style = Hov.type.body, color = if (m.syncState == "rejected") c.inkFaint else c.ink)
+                Text(sentence, style = Hov.type.body, color = if (m.syncState == "rejected") c.inkFaint else c.ink)
                 val meta = listOfNotNull(
                     Fmt.date(m.occurredAt, graph.clock.timeZone()),
                     m.price?.let { "${Fmt.money(it, it.currency)} each" },
                     m.counterparty,
                     if (m.id in page.reversed) "undone" else null,
                     if (m.syncState == "rejected") "not accepted: ${m.rejectReason ?: "conflict"}" else null,
-                    if (m.syncState == "pending") "not synced yet" else null,
+                    if (m.syncState == "pending" && graph.syncEnabled) "not synced yet" else null,
                 )
                 Text(meta.joinToString(", "), style = Hov.type.caption, color = if (m.syncState == "rejected") c.danger else c.inkMuted)
             }

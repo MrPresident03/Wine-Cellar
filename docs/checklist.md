@@ -27,7 +27,7 @@ Legend: ☐ not started · ◐ in progress · ☑ done (with the evidence in bra
 
 ## Milestone 2 — Design system and core screens
 
-- ☐ Theme (dark/light tokens, Caslon + Atkinson Hyperlegible Next), contrast test
+- ☐ Theme (dark/light tokens, Caslon + Source Sans 3), contrast test
 - ☐ Components: vintage-column row, buttons, fields, steppers, chips, status mark, sheets, empty/error/offline/permission states
 - ☐ Cellar list (wines / places), wine detail, add wine (fast entry), edit wine, record movement, history, place detail with grid
 - ☐ Search screen with scopes, filter sheet, sort, grid/list, saved and recent

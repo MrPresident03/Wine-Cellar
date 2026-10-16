@@ -12,7 +12,7 @@ enum class SearchScope(val label: String) {
     /** Wines with bottles in the collection now (optionally including ones no longer held). */
     CELLAR("Cellar"),
     WISHLIST("Wishlist"),
-    TASTINGS("Tasting notes"),
+    TASTINGS("Journal"),
 
     /** An external catalogue, when one is configured. Never mixed with the user's own data. */
     DISCOVER("Discover"),

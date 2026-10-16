@@ -35,8 +35,8 @@ Rows are not cards. Hairlines separate rows because they *are* rows in a ledger;
 | `surfaceRaised` | `#2E2A28` | `#FFFFFF` | Dialogs, menus, photo frames |
 | `hairline` | `#3A3533` | `#E2D9CB` | Row separators, input borders |
 | `ink` | `#EEE7DC` | `#241E1B` | Primary text |
-| `inkMuted` | `#B0A699` | `#6A5F57` | Secondary text |
-| `inkFaint` | `#7F766C` | `#958A80` | Tertiary text, disabled |
+| `inkMuted` | `#B0A699` | `#5A5049` | Secondary text |
+| `inkFaint` | `#9A9085` | `#72675E` | Tertiary text, disabled (still 4.5:1 on canvas) |
 | `burgundy` | `#8E2C3B` | `#7A2333` | Primary buttons, selection, focus ring base |
 | `burgundyBright` | `#D27A86` | `#7A2333` | Accent text/icons on dark (meets 4.5:1) |
 | `onBurgundy` | `#F8EFEF` | `#FFF8F5` | Text on burgundy |
@@ -49,7 +49,7 @@ Drinking-window status uses muted, distinct hues, always paired with the word:
 |---|---|---|
 | Hold | `#8D9BB0` slate | `#4D5E78` |
 | Ready | `#9DB38A` sage | `#4C6B3A` |
-| Drink soon | `#D2A55C` ochre | `#8A6420` |
+| Drink soon | `#D2A55C` ochre | `#805C1A` |
 | Past window | `#B98A80` faded rose-brown | `#8A4E42` |
 | No window | `inkFaint` | `inkFaint` |
 
@@ -60,7 +60,9 @@ All text/background pairs are checked for WCAG AA (4.5:1 body, 3:1 large text an
 Two families, clearly distinct, both open-licensed (SIL OFL) and bundled:
 
 - **Libre Caslon** — headings, wine names, vintages. Caslon is the face of English wine merchants' lists and ledgers; its old-style figures make the vintage column. Regular, Italic, Bold.
-- **Atkinson Hyperlegible Next** — every control, label, number in a form, table and chart. Designed by the Braille Institute for legibility; its distinct letterforms (I/l/1, 0/O) help with dense figures and small sizes. Regular, Medium, SemiBold, with tabular figures for quantities and prices.
+- **Source Sans 3** — every control, label, number in a form, table and chart. A humanist sans with open apertures, generous at small sizes, tabular lining figures by default and a plain (unslashed) zero, so years and prices read as numbers rather than code. Regular, Medium, SemiBold. Bundled as "HoV Sans": a Latin subset renamed as the OFL's Reserved Font Name clause requires for modified copies.
+
+Atkinson Hyperlegible Next was the first choice and was dropped after the first screenshots: its slashed zero made "2010" and "$95.00" look like terminal output beside Caslon's old-style vintages.
 
 Scale (sp; line height in brackets), set for phones and scaled by the user's font size setting:
 
@@ -69,20 +71,20 @@ Scale (sp; line height in brackets), set for phones and scaled by the user's fon
 | `display` | Caslon Regular | 34 (40) | Wine name on bottle detail |
 | `title` | Caslon Regular | 26 (32) | Screen titles |
 | `vintage` | Caslon Regular, old-style figures | 28 (30) | The vintage column |
-| `heading` | Caslon Bold | 19 (24) | Section headings, producer in rows |
-| `cuvee` | Caslon Italic | 17 (22) | Cuvée names |
-| `body` | Atkinson Regular | 16 (24) | Notes, paragraphs |
-| `label` | Atkinson Medium | 14 (20) | Buttons, field labels, chips |
-| `detail` | Atkinson Regular | 14 (20) | Secondary row text |
-| `figure` | Atkinson Medium, tabular | 15 (20) | Counts, prices, sizes |
-| `caption` | Atkinson Regular | 12 (16) | Timestamps, provenance ("Source: Wine-Searcher, 3 Sep 2026") |
+| `heading` | Caslon Bold | 17 (22) | Section headings, producer in rows |
+| `cuvee` | Caslon Italic | 16 (21) | Cuvée names |
+| `body` | Source Sans Regular | 16 (24) | Notes, paragraphs |
+| `label` | Source Sans Medium | 15 (20) | Buttons, field labels, chips |
+| `detail` | Source Sans Regular | 15 (20) | Secondary row text |
+| `figure` | Source Sans Medium, tabular | 16 (20) | Counts, prices, sizes |
+| `caption` | Source Sans Regular | 13 (18) | Timestamps, provenance ("Source: Wine-Searcher, 3 Sep 2026") |
 
 Rules: sentence case everywhere; no all-caps labels; no letter-spaced eyebrows; one italic use (cuvée names) so it always means the same thing.
 
 ## Layout and density
 
 - 4 dp base grid; screen gutters 20 dp; row vertical padding 12 dp; minimum touch target 48 × 48 dp.
-- Lists are left-aligned on the vintage column (64 dp wide). Numbers right-aligned in tabular figures.
+- Lists are left-aligned on the vintage column (76 dp wide). The vintage, producer and quantity share one baseline. Numbers right-aligned in tabular figures; the drinking status sits under the quantity so the place line gets the full width.
 - Phones: single pane. Tablets/landscape ≥ 840 dp: list-detail with the list at 400 dp.
 - Bottle photography sits in a fixed 3:4 frame on `surfaceRaised` with a 2 dp radius — photos are presented like a label shot, not a rounded avatar. No photo: a quiet bottle silhouette in the style colour, never a stock image.
 - Corner radii: 2 dp (photos, inputs), 12 dp (sheets, dialogs), full (chips, status marks). Different radii signal different kinds of object.
@@ -123,4 +125,4 @@ Plain verbs, sentence case, the user's vocabulary: *bottles, wines, vintages, ce
 
 - Dark charcoal + burgundy + cream light mode + serif headings are the brief's own direction, so they are used as asked. The charcoal is warm (`#1B1918`), matching cork and oak rather than a blue-black screen default.
 - The generic version of this brief would be a card grid of bottle photos with a serif header. Rejected: it fails "information density" for a 2,000-bottle collection. The cellar-book list with the vintage column is denser and specific to wine.
-- Generic "luxury" display serifs (Playfair, Didone fashion faces) were considered and rejected: fragile at list sizes and unrelated to wine's own typographic history. Caslon fits merchants' lists; Atkinson Hyperlegible answers the accessibility requirement directly rather than defaulting to a neutral grotesque.
+- Generic "luxury" display serifs (Playfair, Didone fashion faces) were considered and rejected: fragile at list sizes and unrelated to wine's own typographic history. Caslon fits merchants' lists; Source Sans 3 is a humanist sans that stays legible at caption sizes and sits comfortably beside a transitional serif, rather than a neutral grotesque.

@@ -1,5 +1,7 @@
 package com.houseofvino.ui.feature.search
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -121,8 +123,8 @@ fun SearchScreen() {
                 if (q.text.isNotEmpty()) HovIconButton(HovIcons.Close, "Clear search", tint = Hov.colors.inkMuted) { vm.setText("") }
             }
             Spacer(Modifier.height(Space.s))
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.s), modifier = Modifier.fillMaxWidth()) {
-                SearchScope.entries.forEach { s -> Chip(s.label, selected = q.scope == s, onClick = { vm.setScope(s) }) }
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.s), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+                SearchScope.entries.forEach { s -> Chip(s.label, selected = q.scope == s, onClick = { vm.setScope(s) }, role = Role.RadioButton) }
             }
             if (q.scope != SearchScope.DISCOVER) {
                 Row(Modifier.fillMaxWidth().padding(top = Space.xs), verticalAlignment = Alignment.CenterVertically) {

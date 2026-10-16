@@ -9,15 +9,18 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.houseofvino.ui.generated.resources.Res
-import com.houseofvino.ui.generated.resources.atkinson_medium
-import com.houseofvino.ui.generated.resources.atkinson_regular
-import com.houseofvino.ui.generated.resources.atkinson_semibold
 import com.houseofvino.ui.generated.resources.caslon_bold
 import com.houseofvino.ui.generated.resources.caslon_italic
 import com.houseofvino.ui.generated.resources.caslon_regular
+import com.houseofvino.ui.generated.resources.hovsans_medium
+import com.houseofvino.ui.generated.resources.hovsans_regular
+import com.houseofvino.ui.generated.resources.hovsans_semibold
 import org.jetbrains.compose.resources.Font
 
-/** Type scale from docs/design-system.md: Libre Caslon for wine, Atkinson Hyperlegible Next for controls. */
+/**
+ * Type scale from docs/design-system.md: Libre Caslon for wine, Source Sans 3 for controls (bundled as
+ * "HoV Sans", a renamed Latin subset, as the OFL's Reserved Font Name clause requires).
+ */
 @Immutable
 data class HovType(
     val display: TextStyle,
@@ -45,29 +48,29 @@ fun caslon(): FontFamily = FontFamily(
 )
 
 @Composable
-fun atkinson(): FontFamily = FontFamily(
-    Font(Res.font.atkinson_regular, FontWeight.Normal),
-    Font(Res.font.atkinson_medium, FontWeight.Medium),
-    Font(Res.font.atkinson_semibold, FontWeight.SemiBold),
+fun sansFamily(): FontFamily = FontFamily(
+    Font(Res.font.hovsans_regular, FontWeight.Normal),
+    Font(Res.font.hovsans_medium, FontWeight.Medium),
+    Font(Res.font.hovsans_semibold, FontWeight.SemiBold),
 )
 
 @Composable
 fun hovType(): HovType {
     val serif = caslon()
-    val sans = atkinson()
+    val sans = sansFamily()
     return HovType(
         display = TextStyle(fontFamily = serif, fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Normal),
         title = TextStyle(fontFamily = serif, fontSize = 26.sp, lineHeight = 32.sp, fontWeight = FontWeight.Normal),
         vintage = TextStyle(fontFamily = serif, fontSize = 28.sp, lineHeight = 30.sp, fontFeatureSettings = "onum"),
         vintageSmall = TextStyle(fontFamily = serif, fontSize = 20.sp, lineHeight = 24.sp, fontFeatureSettings = "onum"),
-        heading = TextStyle(fontFamily = serif, fontSize = 19.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold),
-        cuvee = TextStyle(fontFamily = serif, fontSize = 17.sp, lineHeight = 22.sp, fontStyle = FontStyle.Italic),
+        heading = TextStyle(fontFamily = serif, fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold),
+        cuvee = TextStyle(fontFamily = serif, fontSize = 16.sp, lineHeight = 21.sp, fontStyle = FontStyle.Italic),
         body = TextStyle(fontFamily = sans, fontSize = 16.sp, lineHeight = 24.sp),
-        label = TextStyle(fontFamily = sans, fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
-        labelStrong = TextStyle(fontFamily = sans, fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold),
-        detail = TextStyle(fontFamily = sans, fontSize = 14.sp, lineHeight = 20.sp),
-        figure = TextStyle(fontFamily = sans, fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum"),
-        figureLarge = TextStyle(fontFamily = sans, fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum"),
-        caption = TextStyle(fontFamily = sans, fontSize = 12.sp, lineHeight = 16.sp),
+        label = TextStyle(fontFamily = sans, fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+        labelStrong = TextStyle(fontFamily = sans, fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold),
+        detail = TextStyle(fontFamily = sans, fontSize = 15.sp, lineHeight = 20.sp),
+        figure = TextStyle(fontFamily = sans, fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum"),
+        figureLarge = TextStyle(fontFamily = sans, fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum"),
+        caption = TextStyle(fontFamily = sans, fontSize = 13.sp, lineHeight = 18.sp),
     )
 }

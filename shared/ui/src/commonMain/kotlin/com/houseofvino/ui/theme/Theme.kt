@@ -33,7 +33,7 @@ object Space {
     val gutter = 20.dp
     val xl = 24.dp
     val xxl = 32.dp
-    val vintageColumn = 64.dp
+    val vintageColumn = 76.dp
     val touch = 48.dp
 }
 

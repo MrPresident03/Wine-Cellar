@@ -126,8 +126,18 @@ fun PlaceScreen(placeId: String) {
                         }
                     }
                 }
+                item {
+                    SectionHeading("Places inside") {
+                        TextAction("Add a place", { nav.push(Route.EditPlace(parentId = placeId)) })
+                    }
+                    if (p.children.isEmpty()) {
+                        Text(
+                            "Shelves, boxes or fridges within ${p.place.name}, if you want to be that precise.",
+                            style = Hov.type.detail, color = Hov.colors.inkMuted, modifier = Modifier.padding(horizontal = Space.gutter),
+                        )
+                    }
+                }
                 if (p.children.isNotEmpty()) {
-                    item { SectionHeading("Inside") }
                     items(p.children, key = { it.first.id }) { (child, n) ->
                         Column(Modifier.fillMaxWidth().clickable { nav.push(Route.Place(child.id)) }) {
                             Row(Modifier.fillMaxWidth().padding(horizontal = Space.gutter, vertical = Space.m), verticalAlignment = Alignment.CenterVertically) {
@@ -138,11 +148,7 @@ fun PlaceScreen(placeId: String) {
                         }
                     }
                 }
-                item {
-                    SectionHeading("Wines") {
-                        TextAction("Add a place inside", { nav.push(Route.EditPlace(parentId = placeId)) })
-                    }
-                }
+                item { SectionHeading("Wines") }
                 if (p.wines.isEmpty()) {
                     item { Text("Nothing here yet.", style = Hov.type.body, color = Hov.colors.inkMuted, modifier = Modifier.padding(horizontal = Space.gutter)) }
                 }

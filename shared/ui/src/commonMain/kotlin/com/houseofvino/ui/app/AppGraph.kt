@@ -32,6 +32,12 @@ class AppGraph(
     val clock: AppClock = SystemClock,
     val defaultCurrency: Currency = Currency("NZD"),
 ) {
+    /**
+     * Whether this install syncs with an account. Until cloud sync ships (milestone 4) everything
+     * stays on this device, so nothing is shown as "waiting to sync".
+     */
+    val syncEnabled: Boolean = false
+
     /** All database work runs here, one statement at a time (SQLite has one connection). */
     val dbDispatcher: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1)
 

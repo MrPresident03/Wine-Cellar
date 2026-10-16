@@ -10,6 +10,7 @@ import com.houseofvino.core.money.Money
 import com.houseofvino.data.NotFoundException
 import com.houseofvino.data.Session
 import com.houseofvino.data.sync.SyncTables
+import kotlinx.datetime.atStartOfDayIn
 
 /** Extra facts recorded with a movement. */
 data class MovementDetails(
@@ -95,10 +96,16 @@ class InventoryRepository(private val store: Store) {
             input.wishlistItemId, input.notes.cleanedMultiline(), now, now, session.userId,
         )
         store.outbox.afterInsert(SyncTables.LOT, lotId, session.householdId)
+        // The history shows a purchase on the day it was bought, not the day it was typed in.
+        val boughtAt = input.acquiredOn?.takeIf { it < store.clock.today() }
+            ?.atStartOfDayIn(store.clock.timeZone())?.toEpochMilliseconds()
         record(
             session,
             MovementDraft(input.kind, lotId, input.quantity, fromLocationId = null, toLocationId = input.locationId),
-            details.copy(placeInSlots = details.placeInSlots.ifEmpty { input.slots }),
+            details.copy(
+                occurredAt = details.occurredAt ?: boughtAt,
+                placeInSlots = details.placeInSlots.ifEmpty { input.slots },
+            ),
         )
         store.indexer.reindexVintage(input.vintageId)
         lotId

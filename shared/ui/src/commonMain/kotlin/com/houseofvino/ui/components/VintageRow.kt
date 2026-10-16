@@ -59,27 +59,23 @@ fun VintageRow(row: CellarRow, currentYear: Int, onClick: () -> Unit, modifier: 
             .clickable(onClick = onClick)
             .clearAndSetSemantics { contentDescription = spoken },
     ) {
-        Row(
-            Modifier.fillMaxWidth().padding(start = Space.gutter, end = Space.gutter, top = 14.dp, bottom = 14.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            VintageFigure(row.vintage, Modifier.width(Space.vintageColumn))
-            Column(Modifier.weight(1f).padding(start = Space.xs)) {
+        Row(Modifier.fillMaxWidth().padding(start = Space.gutter, end = Space.gutter, top = 12.dp, bottom = 12.dp)) {
+            // Vintage, producer and quantity share a baseline, as the lines of a cellar book do.
+            VintageFigure(row.vintage, Modifier.width(Space.vintageColumn).alignByBaseline())
+            Column(Modifier.weight(1f).alignByBaseline()) {
                 Text(row.producer, style = Hov.type.heading, color = Hov.colors.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (cuvee.isNotEmpty()) {
                     Text(cuvee, style = Hov.type.cuvee, color = Hov.colors.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.m)) {
-                    if (place.isNotEmpty()) {
-                        Text(place, style = Hov.type.detail, color = Hov.colors.inkMuted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                    }
-                    StatusMark(status)
+                if (place.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(place, style = Hov.type.detail, color = Hov.colors.inkMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             Spacer(Modifier.width(Space.m))
-            Column(horizontalAlignment = Alignment.End) {
+            Column(Modifier.alignByBaseline(), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(quantity, style = Hov.type.figure, color = if (row.bottles > 0) Hov.colors.ink else Hov.colors.inkFaint, textAlign = TextAlign.End)
+                StatusMark(status)
             }
         }
         Hairline(inset = Space.gutter)
