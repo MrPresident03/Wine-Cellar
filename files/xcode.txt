@@ -1,0 +1,22 @@
+/Applications/Xcode_26.0.1.app
+/Applications/Xcode_26.0.app
+/Applications/Xcode_26.1.1.app
+/Applications/Xcode_26.1.app
+/Applications/Xcode_26.2.0.app
+/Applications/Xcode_26.2.app
+/Applications/Xcode_26.3.0.app
+/Applications/Xcode_26.3.app
+/Applications/Xcode_26.4.1.app
+/Applications/Xcode_26.4.app
+/Applications/Xcode_26.5.0.app
+/Applications/Xcode_26.5.app
+/Applications/Xcode_26.6.0.app
+/Applications/Xcode_26.6.app
+/Applications/Xcode.app
+Xcode 26.4.1
+Build version 17E202
+    iPhone 17 Pro (B34C2F57-B98B-4C84-96E2-3170887BA2DB) (Shutdown) 
+    iPhone 17 Pro Max (8B500E0C-CA36-4F12-853D-3B697FBEA084) (Shutdown) 
+    iPhone Air (3E8A6C6F-3253-4050-8CF7-715CB81ADF06) (Shutdown) 
+    iPhone 17 (24E049C8-1AEC-4A9D-95C6-C11145A59D62) (Shutdown) 
+    iPhone 16e (600A45A3-B3A0-4A39-8A9C-5D051F9FDA9C) (Shutdown) 

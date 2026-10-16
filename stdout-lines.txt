@@ -1,0 +1,4 @@
+== shared/data/build/test-results/iosSimulatorArm64Test/TEST-iosSimulatorArm64Test.com.houseofvino.data.DatabaseSmokeTest.xml
+Bundled SQLite version: 3.50.1
+== shared/data/build/test-results/iosSimulatorArm64Test/TEST-iosSimulatorArm64Test.com.houseofvino.data.InventoryRepositoryTest.xml
+random ledger test: 278 movements, 308 rejected attempts

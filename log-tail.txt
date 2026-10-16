@@ -1,0 +1,599 @@
+    export LINK_WITH_STANDARD_LIBRARIES\=YES
+    export LLVM_TARGET_TRIPLE_OS_VERSION\=ios16.0
+    export LLVM_TARGET_TRIPLE_SUFFIX\=-simulator
+    export LLVM_TARGET_TRIPLE_VENDOR\=apple
+    export LM_AUX_CONST_METADATA_LIST_PATH_normal_arm64\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftConstValuesFileList
+    export LOCALIZATION_EXPORT_SUPPORTED\=YES
+    export LOCALIZATION_PREFERS_STRING_CATALOGS\=NO
+    export LOCALIZED_RESOURCES_FOLDER_PATH\=iosApp.app/en.lproj
+    export LOCALIZED_STRING_CODE_COMMENTS\=NO
+    export LOCALIZED_STRING_MACRO_NAMES\=NSLocalizedString\ CFCopyLocalizedString
+    export LOCALIZED_STRING_SWIFTUI_SUPPORT\=YES
+    export LOCAL_ADMIN_APPS_DIR\=/Applications/Utilities
+    export LOCAL_APPS_DIR\=/Applications
+    export LOCAL_DEVELOPER_DIR\=/Library/Developer
+    export LOCAL_LIBRARY_DIR\=/Library
+    export LOCROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    export LOCSYMROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    export MACH_O_TYPE\=mh_execute
+    export MAC_OS_X_PRODUCT_BUILD_VERSION\=25G83
+    export MAC_OS_X_VERSION_ACTUAL\=260602
+    export MAC_OS_X_VERSION_MAJOR\=260000
+    export MAC_OS_X_VERSION_MINOR\=260600
+    export MAKE_MERGEABLE\=NO
+    export MERGEABLE_LIBRARY\=NO
+    export MERGED_BINARY_TYPE\=none
+    export MERGE_LINKED_LIBRARIES\=NO
+    export METAL_LIBRARY_FILE_BASE\=default
+    export METAL_LIBRARY_OUTPUT_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app
+    export MODULES_FOLDER_PATH\=iosApp.app/Modules
+    export MODULE_CACHE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex
+    export MTL_ENABLE_DEBUG_INFO\=INCLUDE_SOURCE
+    export MTL_FAST_MATH\=YES
+    export NATIVE_ARCH\=arm64
+    export NATIVE_ARCH_32_BIT\=arm
+    export NATIVE_ARCH_64_BIT\=arm64
+    export NATIVE_ARCH_ACTUAL\=arm64
+    export NO_COMMON\=YES
+    export OBJC_ABI_VERSION\=2
+    export OBJECT_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects
+    export OBJECT_FILE_DIR_normal\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal
+    export OBJROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex
+    export ONLY_ACTIVE_ARCH\=NO
+    export OS\=MACOS
+    export OSAC\=/usr/bin/osacompile
+    export OTHER_LDFLAGS\=\ -framework\ HouseOfVino
+    export PACKAGE_TYPE\=com.apple.package-type.wrapper.application
+    export PASCAL_STRINGS\=YES
+    export PATH\=/Applications/Xcode_26.4.1.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.N6W79N/Metal.xctoolchain/usr/bin:/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.N6W79N/Metal.xctoolchain/usr/local/bin:/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.N6W79N/Metal.xctoolchain/usr/libexec:/Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/usr/local/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/local/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/usr/bin:/Applications/Xcode_26.4.1.app/Contents/Developer/usr/local/bin:/Users/runner/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-101.0/arm64/Contents/Home/bin:/opt/homebrew/lib/ruby/gems/3.4.0/bin:/opt/homebrew/opt/ruby@3.4/bin:/Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+    export PATH_PREFIXES_EXCLUDED_FROM_HEADER_DEPENDENCIES\=/usr/include\ /usr/local/include\ /System/Library/Frameworks\ /System/Library/PrivateFrameworks\ /Applications/Xcode_26.4.1.app/Contents/Developer/Headers\ /Applications/Xcode_26.4.1.app/Contents/Developer/SDKs\ /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms
+    export PBDEVELOPMENTPLIST_PATH\=iosApp.app/pbdevelopment.plist
+    export PER_ARCH_MODULE_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/undefined_arch
+    export PER_ARCH_OBJECT_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/undefined_arch
+    export PER_VARIANT_OBJECT_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal
+    export PKGINFO_FILE_PATH\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/PkgInfo
+    export PKGINFO_PATH\=iosApp.app/PkgInfo
+    export PLATFORM_DEVELOPER_APPLICATIONS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications
+    export PLATFORM_DEVELOPER_BIN_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin
+    export PLATFORM_DEVELOPER_LIBRARY_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library
+    export PLATFORM_DEVELOPER_SDK_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs
+    export PLATFORM_DEVELOPER_TOOLS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Tools
+    export PLATFORM_DEVELOPER_USR_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr
+    export PLATFORM_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform
+    export PLATFORM_DISPLAY_NAME\=iOS\ Simulator
+    export PLATFORM_FAMILY_NAME\=iOS
+    export PLATFORM_NAME\=iphonesimulator
+    export PLATFORM_PREFERRED_ARCH\=x86_64
+    export PLATFORM_PRODUCT_BUILD_VERSION\=23E252
+    export PLATFORM_REQUIRES_SWIFT_AUTOLINK_EXTRACT\=NO
+    export PLATFORM_REQUIRES_SWIFT_MODULEWRAP\=NO
+    export PLATFORM_USES_DSYMS\=YES
+    export PLIST_FILE_OUTPUT_FORMAT\=binary
+    export PLUGINS_FOLDER_PATH\=iosApp.app/PlugIns
+    export PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR\=YES
+    export PRECOMP_DESTINATION_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/PrefixHeaders
+    export PRIVATE_HEADERS_FOLDER_PATH\=iosApp.app/PrivateHeaders
+    export PROCESSED_INFOPLIST_PATH\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/undefined_arch/Processed-Info.plist
+    export PRODUCT_BUNDLE_IDENTIFIER\=com.houseofvino.app
+    export PRODUCT_BUNDLE_PACKAGE_TYPE\=APPL
+    export PRODUCT_MODULE_NAME\=iosApp
+    export PRODUCT_NAME\=iosApp
+    export PRODUCT_SETTINGS_PATH\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/Info.plist
+    export PRODUCT_TYPE\=com.apple.product-type.application
+    export PROFILING_CODE\=NO
+    export PROJECT\=iosApp
+    export PROJECT_DERIVED_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/DerivedSources
+    export PROJECT_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    export PROJECT_FILE_PATH\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp.xcodeproj
+    export PROJECT_GUID\=7b79493a8b7fc1f2fff3c51cd12ba024
+    export PROJECT_NAME\=iosApp
+    export PROJECT_TEMP_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build
+    export PROJECT_TEMP_ROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex
+    export PROVISIONING_PROFILE_REQUIRED\=NO
+    export PROVISIONING_PROFILE_REQUIRED_YES_YES\=YES
+    export PROVISIONING_PROFILE_SUPPORTED\=YES
+    export PUBLIC_HEADERS_FOLDER_PATH\=iosApp.app/Headers
+    export RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET\=15.0
+    export RECURSIVE_SEARCH_PATHS_FOLLOW_SYMLINKS\=YES
+    export REMOVE_CVS_FROM_RESOURCES\=YES
+    export REMOVE_GIT_FROM_RESOURCES\=YES
+    export REMOVE_HEADERS_FROM_EMBEDDED_BUNDLES\=YES
+    export REMOVE_HG_FROM_RESOURCES\=YES
+    export REMOVE_STATIC_EXECUTABLES_FROM_EMBEDDED_BUNDLES\=YES
+    export REMOVE_SVN_FROM_RESOURCES\=YES
+    export RESCHEDULE_INDEPENDENT_HEADERS_PHASES\=YES
+    export REZ_COLLECTOR_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/ResourceManagerResources
+    export REZ_OBJECTS_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/ResourceManagerResources/Objects
+    export REZ_SEARCH_PATHS\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator\ 
+    export RPATH_ORIGIN\=@loader_path
+    export RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES\=NO
+    export RUNTIME_EXCEPTION_ALLOW_JIT\=NO
+    export RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY\=NO
+    export RUNTIME_EXCEPTION_DEBUGGING_TOOL\=NO
+    export RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION\=NO
+    export RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION\=NO
+    export SCANNING_PCM_KEEP_CACHE_DIRECTORY\=YES
+    export SCAN_ALL_SOURCE_FILES_FOR_INCLUDES\=NO
+    export SCRIPTS_FOLDER_PATH\=iosApp.app/Scripts
+    export SCRIPT_INPUT_FILE_COUNT\=0
+    export SCRIPT_INPUT_FILE_LIST_COUNT\=0
+    export SCRIPT_OUTPUT_FILE_COUNT\=0
+    export SCRIPT_OUTPUT_FILE_LIST_COUNT\=0
+    export SDKROOT\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk
+    export SDK_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk
+    export SDK_DIR_iphonesimulator\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk
+    export SDK_DIR_iphonesimulator26_4\=/Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk
+    export SDK_NAME\=iphonesimulator26.4
+    export SDK_NAMES\=iphonesimulator26.4
+    export SDK_PRODUCT_BUILD_VERSION\=23E252
+    export SDK_STAT_CACHE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived
+    export SDK_STAT_CACHE_ENABLE\=YES
+    export SDK_STAT_CACHE_PATH\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/SDKStatCaches.noindex/iphonesimulator26.4-23E252-688ef53f1462e2c8f657fdc38a81448f893e4a944e4cdd9af1f5077e1341bc52.sdkstatcache
+    export SDK_VERSION\=26.4
+    export SDK_VERSION_ACTUAL\=260400
+    export SDK_VERSION_MAJOR\=260000
+    export SDK_VERSION_MINOR\=260400
+    export SED\=/usr/bin/sed
+    export SEPARATE_STRIP\=NO
+    export SEPARATE_SYMBOL_EDIT\=NO
+    export SET_DIR_MODE_OWNER_GROUP\=YES
+    export SET_FILE_MODE_OWNER_GROUP\=NO
+    export SHALLOW_BUNDLE\=YES
+    export SHALLOW_BUNDLE_TRIPLE\=ios-simulator
+    export SHALLOW_BUNDLE_ios_macabi\=NO
+    export SHALLOW_BUNDLE_macos\=NO
+    export SHARED_DERIVED_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/DerivedSources
+    export SHARED_FRAMEWORKS_FOLDER_PATH\=iosApp.app/SharedFrameworks
+    export SHARED_PRECOMPS_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/PrecompiledHeaders
+    export SHARED_SUPPORT_FOLDER_PATH\=iosApp.app/SharedSupport
+    export SKIP_INSTALL\=NO
+    export SKIP_MERGEABLE_LIBRARY_BUNDLE_HOOK\=NO
+    export SOURCE_ROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    export SRCROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    export STRINGSDATA_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/undefined_arch
+    export STRINGSDATA_ROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build
+    export STRINGS_FILE_INFOPLIST_RENAME\=YES
+    export STRINGS_FILE_OUTPUT_ENCODING\=binary
+    export STRING_CATALOG_GENERATE_SYMBOLS\=NO
+    export STRIP_BITCODE_FROM_COPIED_FILES\=NO
+    export STRIP_INSTALLED_PRODUCT\=NO
+    export STRIP_STYLE\=all
+    export STRIP_SWIFT_SYMBOLS\=YES
+    export SUPPORTED_DEVICE_FAMILIES\=1,2
+    export SUPPORTED_PLATFORMS\=iphoneos\ iphonesimulator
+    export SUPPORTS_MACCATALYST\=NO
+    export SUPPORTS_ON_DEMAND_RESOURCES\=YES
+    export SUPPORTS_TEXT_BASED_API\=NO
+    export SUPPRESS_WARNINGS\=NO
+    export SWIFT_ACTIVE_COMPILATION_CONDITIONS\=DEBUG
+    export SWIFT_EMIT_CONST_VALUE_PROTOCOLS\=AnyResolverProviding\ AppEntity\ AppEnum\ AppExtension\ AppIntent\ AppIntentsPackage\ AppShortcutProviding\ AppShortcutsProvider\ DynamicOptionsProvider\ EntityQuery\ ExtensionPointDefining\ IntentValueQuery\ Resolver\ TransientEntity\ _AssistantIntentsProvider\ _GenerativeFunctionExtractable\ _IntentValueRepresentable
+    export SWIFT_EMIT_LOC_STRINGS\=NO
+    export SWIFT_ENABLE_EXPLICIT_MODULES\=YES
+    export SWIFT_OPTIMIZATION_LEVEL\=-Onone
+    export SWIFT_PLATFORM_TARGET_PREFIX\=ios
+    export SWIFT_RESPONSE_FILE_PATH_normal_arm64\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftFileList
+    export SWIFT_VERSION\=5.0
+    export SYMROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products
+    export SYSTEM_ADMIN_APPS_DIR\=/Applications/Utilities
+    export SYSTEM_APPS_DIR\=/Applications
+    export SYSTEM_CORE_SERVICES_DIR\=/System/Library/CoreServices
+    export SYSTEM_DEMOS_DIR\=/Applications/Extras
+    export SYSTEM_DEVELOPER_APPS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Applications
+    export SYSTEM_DEVELOPER_BIN_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/usr/bin
+    export SYSTEM_DEVELOPER_DEMOS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Applications/Utilities/Built\ Examples
+    export SYSTEM_DEVELOPER_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer
+    export SYSTEM_DEVELOPER_DOC_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/ADC\ Reference\ Library
+    export SYSTEM_DEVELOPER_GRAPHICS_TOOLS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Applications/Graphics\ Tools
+    export SYSTEM_DEVELOPER_JAVA_TOOLS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Applications/Java\ Tools
+    export SYSTEM_DEVELOPER_PERFORMANCE_TOOLS_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Applications/Performance\ Tools
+    export SYSTEM_DEVELOPER_RELEASENOTES_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/ADC\ Reference\ Library/releasenotes
+    export SYSTEM_DEVELOPER_TOOLS\=/Applications/Xcode_26.4.1.app/Contents/Developer/Tools
+    export SYSTEM_DEVELOPER_TOOLS_DOC_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/ADC\ Reference\ Library/documentation/DeveloperTools
+    export SYSTEM_DEVELOPER_TOOLS_RELEASENOTES_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/ADC\ Reference\ Library/releasenotes/DeveloperTools
+    export SYSTEM_DEVELOPER_USR_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/usr
+    export SYSTEM_DEVELOPER_UTILITIES_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Applications/Utilities
+    export SYSTEM_DEXT_INSTALL_PATH\=/System/Library/DriverExtensions
+    export SYSTEM_DOCUMENTATION_DIR\=/Library/Documentation
+    export SYSTEM_EXTENSIONS_FOLDER_PATH\=iosApp.app/SystemExtensions
+    export SYSTEM_EXTENSIONS_FOLDER_PATH_SHALLOW_BUNDLE_NO\=iosApp.app/Library/SystemExtensions
+    export SYSTEM_EXTENSIONS_FOLDER_PATH_SHALLOW_BUNDLE_YES\=iosApp.app/SystemExtensions
+    export SYSTEM_KEXT_INSTALL_PATH\=/System/Library/Extensions
+    export SYSTEM_LIBRARY_DIR\=/System/Library
+    export TAPI_DEMANGLE\=YES
+    export TAPI_ENABLE_PROJECT_HEADERS\=NO
+    export TAPI_LANGUAGE\=objective-c
+    export TAPI_LANGUAGE_STANDARD\=compiler-default
+    export TAPI_USE_SRCROOT\=YES
+    export TAPI_VERIFY_MODE\=Pedantic
+    export TARGETED_DEVICE_FAMILY\=1,2
+    export TARGETNAME\=iosApp
+    export TARGET_BUILD_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator
+    export TARGET_NAME\=iosApp
+    export TARGET_TEMP_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build
+    export TEMP_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build
+    export TEMP_FILES_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build
+    export TEMP_FILE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build
+    export TEMP_ROOT\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex
+    export TEMP_SANDBOX_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/TemporaryTaskSandboxes
+    export TEST_FRAMEWORK_SEARCH_PATHS\=\ /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks\ /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/Developer/Library/Frameworks
+    export TEST_LIBRARY_SEARCH_PATHS\=\ /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib
+    export TOOLCHAINS\=com.apple.dt.toolchain.Metal.32023.883\ com.apple.dt.toolchain.XcodeDefault
+    export TOOLCHAIN_DIR\=/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.N6W79N/Metal.xctoolchain
+    export TOOLCHAIN_VERSION\=32023.883
+    export TREAT_MISSING_BASELINES_AS_TEST_FAILURES\=NO
+    export TREAT_MISSING_SCRIPT_PHASE_OUTPUTS_AS_ERRORS\=NO
+    export UID\=501
+    export UNINSTALLED_PRODUCTS_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/UninstalledProducts
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH\=iosApp.app
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH_SHALLOW_BUNDLE_NO\=iosApp.app/Resources
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH_SHALLOW_BUNDLE_YES\=iosApp.app
+    export UNSTRIPPED_PRODUCT\=NO
+    export USER\=runner
+    export USER_APPS_DIR\=/Users/runner/Applications
+    export USER_LIBRARY_DIR\=/Users/runner/Library
+    export USE_DYNAMIC_NO_PIC\=YES
+    export USE_HEADERMAP\=YES
+    export USE_HEADER_SYMLINKS\=NO
+    export VALIDATE_DEVELOPMENT_ASSET_PATHS\=YES_ERROR
+    export VALIDATE_PRODUCT\=NO
+    export VALID_ARCHS\=arm64\ x86_64
+    export VERBOSE_PBXCP\=NO
+    export VERSIONPLIST_PATH\=iosApp.app/version.plist
+    export VERSION_INFO_BUILDER\=runner
+    export VERSION_INFO_FILE\=iosApp_vers.c
+    export VERSION_INFO_STRING\=\"@\(\#\)PROGRAM:iosApp\ \ PROJECT:iosApp-\"
+    export WORKSPACE_DIR\=/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp.xcodeproj
+    export WRAPPER_EXTENSION\=app
+    export WRAPPER_NAME\=iosApp.app
+    export WRAPPER_SUFFIX\=.app
+    export WRAP_ASSET_PACKS_IN_SEPARATE_DIRECTORIES\=NO
+    export XCODE_APP_SUPPORT_DIR\=/Applications/Xcode_26.4.1.app/Contents/Developer/Library/Xcode
+    export XCODE_PRODUCT_BUILD_VERSION\=17E202
+    export XCODE_VERSION_ACTUAL\=2641
+    export XCODE_VERSION_MAJOR\=2600
+    export XCODE_VERSION_MINOR\=2640
+    export XPCSERVICES_FOLDER_PATH\=iosApp.app/XPCServices
+    export YACC\=yacc
+    export _DISCOVER_COMMAND_LINE_LINKER_INPUTS\=YES
+    export _DISCOVER_COMMAND_LINE_LINKER_INPUTS_INCLUDE_WL\=YES
+    export _LD_MULTIARCH\=YES
+    export _WRAPPER_CONTENTS_DIR_SHALLOW_BUNDLE_NO\=/Contents
+    export _WRAPPER_PARENT_PATH_SHALLOW_BUNDLE_NO\=/..
+    export _WRAPPER_RESOURCES_DIR_SHALLOW_BUNDLE_NO\=/Resources
+    export __DIAGNOSE_DEPRECATED_ARCHS\=YES
+    export __IS_NOT_MACOS\=YES
+    export __IS_NOT_MACOS_macosx\=NO
+    export __IS_NOT_SIMULATOR\=NO
+    export __IS_NOT_SIMULATOR_simulator\=NO
+    export __ORIGINAL_SDK_DEFINED_LLVM_TARGET_TRIPLE_SYS\=ios
+    export arch\=undefined_arch
+    export variant\=normal
+    /bin/sh -c /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Script-458C440C0A3302CF3B2904F4.sh
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Calculating task graph as no cached configuration is available for tasks: :shared:ui:embedAndSignAppleFrameworkForXcode
+Type-safe project accessors is an incubating feature.
+
+> Configure project :shared:core
+WARNING: The 'commonTest' source directory exists, but android host tests are not enabled. To enable android host tests, add `withHostTest {}` to your android target configuration in the Gradle build file.
+Add android.sync.suppressAgpWarnings=GENERIC to the gradle.properties file to suppress this warning.
+
+> Configure project :shared:data
+WARNING: The 'commonTest' source directory exists, but android host tests are not enabled. To enable android host tests, add `withHostTest {}` to your android target configuration in the Gradle build file.
+Add android.sync.suppressAgpWarnings=GENERIC to the gradle.properties file to suppress this warning.
+
+> Configure project :shared:ui
+WARNING: The 'commonTest' source directory exists, but android host tests are not enabled. To enable android host tests, add `withHostTest {}` to your android target configuration in the Gradle build file.
+Add android.sync.suppressAgpWarnings=GENERIC to the gradle.properties file to suppress this warning.
+
+> Task :shared:ui:checkSyntheticImportProjectIsCorrectlyIntegratedForEmbedAndSign SKIPPED
+> Task :shared:ui:checkSyntheticImportProjectIsCorrectlyIntegratedForEmbedSwiftExport SKIPPED
+> Task :shared:ui:generateSyntheticLinkageSwiftPMImportProjectForEmbedAndSignLinkage SKIPPED
+> Task :shared:core:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:ui:checkSandboxAndWriteProtection
+> Task :shared:core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:data:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:data:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:core:exportCrossCompilationMetadataForIosSimulatorArm64ApiElements UP-TO-DATE
+> Task :shared:ui:kmpPartiallyResolvedDependenciesChecker
+> Task :shared:ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:data:exportCrossCompilationMetadataForIosSimulatorArm64ApiElements UP-TO-DATE
+> Task :shared:ui:checkIosSimulatorArm64MainComposeLibrariesCompatibility
+> Task :shared:ui:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :shared:core:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :shared:data:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :shared:data:generateCommonMainHouseOfVinoDatabaseInterface UP-TO-DATE
+> Task :shared:ui:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :shared:ui:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :shared:ui:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :shared:ui:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :shared:ui:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :shared:ui:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :shared:ui:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :shared:ui:generateResourceAccessorsForIosMain NO-SOURCE
+> Task :shared:ui:copyNonXmlValueResourcesForCommonMain UP-TO-DATE
+> Task :shared:ui:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :shared:ui:generateResourceAccessorsForAppleMain NO-SOURCE
+> Task :shared:ui:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :shared:ui:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :shared:ui:generateResourceAccessorsForIosSimulatorArm64Main NO-SOURCE
+> Task :shared:ui:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :shared:ui:generateComposeResClass UP-TO-DATE
+> Task :shared:ui:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :shared:ui:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :shared:ui:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :shared:ui:generateResourceAccessorsForNativeMain NO-SOURCE
+> Task :shared:ui:createBuildSystemDirectory
+> Task :shared:ui:checkCanSyncComposeResourcesForIos
+> Task :shared:ui:prepareComposeResourcesTaskForCommonMain UP-TO-DATE
+> Task :shared:ui:symbolicLinkToAssembleDebugAppleFrameworkForXcodeIosSimulatorArm64
+> Task :shared:ui:convertXmlValueResourcesForIosArm64Main NO-SOURCE
+> Task :shared:ui:copyNonXmlValueResourcesForIosArm64Main NO-SOURCE
+> Task :shared:ui:generateResourceAccessorsForCommonMain UP-TO-DATE
+> Task :shared:ui:prepareComposeResourcesTaskForIosArm64Main NO-SOURCE
+> Task :shared:ui:generateActualResourceCollectorsForIosSimulatorArm64Main UP-TO-DATE
+> Task :shared:ui:iosSimulatorArm64ResolveResourcesFromDependencies UP-TO-DATE
+> Task :shared:ui:assembleIosSimulatorArm64MainResources UP-TO-DATE
+> Task :shared:ui:iosSimulatorArm64ResolveSelfResourcesCopyHierarchicalMultiplatformResources UP-TO-DATE
+> Task :shared:ui:iosSimulatorArm64AggregateResources UP-TO-DATE
+> Task :shared:ui:validateArchitecturesForEmbedAndSignAppleFrameworkForXcode
+> Task :shared:ui:assembleIosArm64MainResources
+> Task :shared:ui:iosArm64ResolveResourcesFromDependencies
+> Task :shared:ui:iosArm64ResolveSelfResourcesCopyHierarchicalMultiplatformResources
+> Task :shared:ui:iosArm64AggregateResources
+> Task :shared:ui:syncComposeResourcesForIos
+> Task :shared:core:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :shared:data:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :shared:ui:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :shared:ui:linkDebugFrameworkIosSimulatorArm64
+warning: The number of threads 4 is more than the number of processors 3
+
+> Task :shared:ui:assembleDebugAppleFrameworkForXcodeIosSimulatorArm64
+> Task :shared:ui:copyDsymForEmbedAndSignAppleFrameworkForXcode SKIPPED
+> Task :shared:ui:embedAndSignAppleFrameworkForXcode SKIPPED
+gradle/actions: Writing build results to /Users/runner/work/_temp/.gradle-actions/build-results/xcode-1792185631286.json
+
+[Incubating] Problems report is available at: file:///Users/runner/work/Wine-Cellar/Wine-Cellar/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.7.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 13s
+35 actionable tasks: 16 executed, 19 up-to-date
+Configuration cache entry stored.
+
+ProcessInfoPlistFile /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Info.plist /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/Info.plist (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-infoPlistUtility /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -o /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Info.plist
+
+SwiftDriver iosApp normal arm64 com.apple.xcode.tools.swift.compiler (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-SwiftDriver -- /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name iosApp -Onone @/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios16.0-simulator -g -module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F /Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/SDKStatCaches.noindex/iphonesimulator26.4-23E252-688ef53f1462e2c8f657fdc38a81448f893e4a944e4cdd9af1f5077e1341bc52.sdkstatcache -output-file-map /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-generated-files.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-own-target-headers.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-project-headers.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-Swift.h -working-directory /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/__preview.dylib normal (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0-simulator -dynamiclib -isysroot /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -O0 -L/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4 -install_name @rpath/iosApp.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_dependency_info.dat -o /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/__preview.dylib
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_SwiftConcurrencyShims-7KDRK2O1AXWUU00ICABP5RJYK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/SwiftShims-8WWLD0YAE6LCLXE61Q7SUIMQZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_stddef-8OX2LWJUUT8C3UHMTJC9MS6S1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/ptrcheck-DGSYUL6B8GQMK9YWYQI4QZ3B6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/DeveloperToolsSupport-TT6FQ684D4PKXWO9FF1YAQHI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_float-AXNFCCKW9G2SZ8KXHNT2WW5VM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_stdbool-2J655MCC4KKJ6I42CT4ZY82GP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/ptrauth-1QXO6AO02KSH2MEHDO2PYFP8X.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_stdarg-1H7WUKC1A0MQ54TMNIYEC4QFM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_AvailabilityInternal-EAVDC810B8A170B4QB2I2OZO0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_DarwinFoundation1-5WL9K4D0GFYLO6NBSPHCOAY5Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_DarwinFoundation2-DZ4RQULOVGQ3TGEYJRT4AS16Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_limits-8C4C3GK9NYTMIEPMB0TRVY9W3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/sys_types-SUKHERBJ94RVT1LDHYYID2OD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_tgmath-BRZNE2PE1MXRUE5PEUKP7MA8C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_stdint-2B3D33JYWYTRNOSUG739S437.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_DarwinFoundation3-E1BABNJ7V9C2ZDXAX04W70RY1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_stdatomic-BGUMI7D3SP9VSKUU9PJNYKBD2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_intrinsics-3SSFHYL1S4NIYE48M9QL9LIDT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/_Builtin_inttypes-A3J8I6EAS5KINWHE2YY4QEBXP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Darwin-AIHR24NUYSL67M96WRPT20KPL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/simd-UI2NQT9YHTOEOK2ABMAK790M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/MachO-CX9ZJPB6U59TN5XUI6CD217QR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/ObjectiveC-BZTUP9MS4C1IOF7PAHZKSW377.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/os_object-7SJRSQX7FWEEYQYKAU4PDJKTT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/os_workgroup-5K0707KEZK8PL1F7L1BB4ML00.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Spatial-EF4F2QOJAK987YYESFTXPQA5V.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Dispatch-2QUBY76M65RP1I1M6KCRFBO0H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/XPC-4D82GA7F2IFYSLXIGP83CG33Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreFoundation-ECO2EGQIKL92NXFN8MQE40NAM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/os-4VHJA5OM9IM60U905FYKIM9A.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CFNetwork-GVEUNTQNJTRMAN5NK2SAV39U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreGraphics-1XGJ142EFU53UO3NJY3ANHAWC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Security-6NC58VUO2ZFO1R75QO3Y3YG3Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Foundation-GWKDVP497J9P5J7TQA7T107U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreText-70Q4ZO02LBJI563FAXBBMC7UO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/ImageIO-6C8CPQTHBC37DB7PWOMTJLC19.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/FileProvider-FR2ZMTQKDFV7U791MP3JCFGI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/UserNotifications-29ALEJ5S30LDH2SJ8FDZKOE7P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/HouseOfVino-8S2DGTN9CBB53S1XQM42R39CG.pcm
+/Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4/HouseOfVino.framework/Headers/HouseOfVino.h:7478:16: warning: imported declaration 'HOVCoreDecimalParserStyle' could not be mapped to 'CoreDecimalParser.Style' [#ClangDeclarationImport]
+ 7476 | 
+ 7477 | __attribute__((objc_subclassing_restricted))
+ 7478 | __attribute__((swift_name("CoreDecimalParser.Style")))
+      |                |- warning: imported declaration 'HOVCoreDecimalParserStyle' could not be mapped to 'CoreDecimalParser.Style' [#ClangDeclarationImport]
+      |                `- note: please report this issue to the owners of 'HouseOfVino'
+ 7479 | @interface HOVCoreDecimalParserStyle : HOVBase
+ 7480 | - (instancetype)initWithDecimalSeparator:(unichar)decimalSeparator groupingSeparator:(id _Nullable)groupingSeparator __attribute__((swift_name("init(decimalSeparator:groupingSeparator:)"))) __attribute__((objc_designated_initializer));
+
+[#ClangDeclarationImport]: <https://docs.swift.org/compiler/documentation/diagnostics/clang-declaration-import>
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/UIUtilities-DXBHOLCPRTFPXEEWBBORMEMLB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Accessibility-4I49H78X2CQFB8B8HQJIVADMZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreData-867GRRQX7XQQN9AX785Q5RN44.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/UniformTypeIdentifiers-9SSV0S67ZSM84OYX781NMJ2QX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/IOSurface-A90JANWZHHBLPH4S0HXW979Z6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Symbols-C3ZI0AKXTO5U5CZONCRBV5ME7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/OSLog-16RFGEG9C37TA0LY0K7QLUL51.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Metal-3URS8N1DNF6ZU3QLIV42V7SND.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/DataDetection-B6BLNFE75T6346VZ8QJ1FTF8V.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreTransferable-DDA1XBGLUDB7FSOV6LZEJQBVR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/OpenGLES-C1VVT6PX87WYCKFTTNQBCTFSL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreVideo-61W3M0BEK5WO6H8TD415EU4HS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/QuartzCore-A3Q8DYSLJ3WABA0GJU31ZATET.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/CoreImage-2CUEVB7R1RNHXMRML7IHFZ6OQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/SwiftUICore-6Q8F3VYL13CX64MSG7T4IYGSW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/UIKit-CK1VMY6ZZARM1LY150BEBDBNE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/SwiftUI-6L335QV461LJZOFRFC4EZFEJP.pcm
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ iosApp (in target 'iosApp' from project 'iosApp')
+
+EmitSwiftModule normal arm64 (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    
+
+SwiftCompile normal arm64 Compiling\ iOSApp.swift /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/iOSApp.swift (in target 'iosApp' from project 'iosApp')
+SwiftCompile normal arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/iOSApp.swift (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    
+
+SwiftCompile normal arm64 Compiling\ ContentView.swift /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/ContentView.swift (in target 'iosApp' from project 'iosApp')
+SwiftCompile normal arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp/ContentView.swift (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for iosApp (in target 'iosApp' from project 'iosApp')
+
+SwiftDriver\ Compilation\ Requirements iosApp normal arm64 com.apple.xcode.tools.swift.compiler (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name iosApp -Onone @/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios16.0-simulator -g -module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F /Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/SDKStatCaches.noindex/iphonesimulator26.4-23E252-688ef53f1462e2c8f657fdc38a81448f893e4a944e4cdd9af1f5077e1341bc52.sdkstatcache -output-file-map /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-generated-files.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-own-target-headers.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-project-headers.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-Swift.h -working-directory /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources/iosApp-Swift.h /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-Swift.h (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-swiftHeaderTool -arch arm64 /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-Swift.h -o /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources/iosApp-Swift.h
+
+Copy /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftmodule (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftmodule /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftdoc (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftdoc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.abi.json (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.abi.json /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftsourceinfo (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftsourceinfo /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling iOSApp.swift (in target 'iosApp' from project 'iosApp')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ContentView.swift (in target 'iosApp' from project 'iosApp')
+
+SwiftDriver\ Compilation iosApp normal arm64 com.apple.xcode.tools.swift.compiler (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-Swift-Compilation -- /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name iosApp -Onone @/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios16.0-simulator -g -module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F /Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/SDKStatCaches.noindex/iphonesimulator26.4-23E252-688ef53f1462e2c8f657fdc38a81448f893e4a944e4cdd9af1f5077e1341bc52.sdkstatcache -output-file-map /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-generated-files.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-own-target-headers.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-project-headers.hmap -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-Swift.h -working-directory /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp.debug.dylib normal (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0-simulator -dynamiclib -isysroot /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -O0 -L/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4 -filelist /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.LinkFileList -install_name @rpath/iosApp.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.swiftmodule @/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp-linker-args.resp -framework HouseOfVino -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -o /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp.debug.dylib
+/Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp/iosApp.xcodeproj: iosApp: ld: warning: object file (/Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4/HouseOfVino.framework/HouseOfVino[1895](libicu.icudtl_dat.o)) was built for newer 'iOS-simulator' version (18.5) than being linked (16.0)
+
+ConstructStubExecutorLinkFileList /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-ExecutorLinkFileList-normal-arm64.txt (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    construct-stub-executor-link-file-list /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp.debug.dylib /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'iosApp' from project 'iosApp')
+
+Ld /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp normal (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0-simulator -isysroot /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -O0 -L/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator -F/Users/runner/work/Wine-Cellar/Wine-Cellar/shared/ui/build/xcode-frameworks/Debug/iphonesimulator26.4 -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp-ExecutorLinkFileList-normal-arm64.txt /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp.debug.dylib -o /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp
+
+ExtractAppIntentsMetadata (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.N6W79N/Metal.xctoolchain --module-name iosApp --sdk-root /Applications/Xcode_26.4.1.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk --xcode-version 17E202 --platform-family iOS --deployment-target 16.0 --bundle-identifier com.houseofvino.app --output /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app --target-triple arm64-apple-ios16.0-simulator --binary-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp --dependency-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp_dependency_info.dat --stringsdata-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftFileList --metadata-file-list /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp.DependencyMetadataFileList --static-metadata-file-list /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/Objects-normal/arm64/iosApp.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-10-16 21:21:55.524 appintentsmetadataprocessor[19436:54172] Starting appintentsmetadataprocessor export
+2026-10-16 21:21:55.543 appintentsmetadataprocessor[19436:54172] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+CopySwiftLibs /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/iosApp.debug.dylib --scan-folder /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Frameworks --scan-folder /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/PlugIns --scan-folder /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/SystemExtensions --scan-folder /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Extensions --platform iphonesimulator --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.N6W79N/Metal.xctoolchain --toolchain /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+AppIntentsSSUTraining (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    /Applications/Xcode_26.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Info.plist --temp-dir-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/ssu --bundle-id com.houseofvino.app --product-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app --extracted-metadata-path /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Metadata.appintents --metadata-file-list /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Intermediates.noindex/iosApp.build/Debug-iphonesimulator/iosApp.build/iosApp.DependencyMetadataFileList --source-file /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app/Info.plist --archive-ssu-assets
+2026-10-16 21:21:55.603 appintentsnltrainingprocessor[19437:54174] Parsing options for appintentsnltrainingprocessor
+2026-10-16 21:21:55.605 appintentsnltrainingprocessor[19437:54174] Starting AppIntents SSU YAML Generation
+2026-10-16 21:21:55.613 appintentsnltrainingprocessor[19437:54174] No AppShortcuts found - Skipping.
+
+RegisterExecutionPolicyException /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-RegisterExecutionPolicyException /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app
+
+Validate /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    builtin-validationUtility /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app (in target 'iosApp' from project 'iosApp')
+    cd /Users/runner/work/Wine-Cellar/Wine-Cellar/iosApp
+    /usr/bin/touch -c /Users/runner/work/Wine-Cellar/Wine-Cellar/build/ios-derived/Build/Products/Debug-iphonesimulator/iosApp.app
+
+note: Run script build phase 'Compile Kotlin framework' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'iosApp' from project 'iosApp')
+** BUILD SUCCEEDED **
