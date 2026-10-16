@@ -1,0 +1,68 @@
+== io/github/jan-tennert/supabase/auth-kt/3.8.0/auth-kt-3.8.0.pom
+      <artifactId>ktor-server-core</artifactId>
+      <version>3.5.1</version>
+      <artifactId>ktor-server-cio</artifactId>
+      <version>3.5.1</version>
+      <artifactId>kotlinx-browser</artifactId>
+      <version>0.5.0</version>
+== io/github/jan-tennert/supabase/supabase-kt/3.8.0/supabase-kt-3.8.0.pom
+      <artifactId>kotlinx-datetime</artifactId>
+      <version>0.8.0</version>
+      <artifactId>kotlinx-coroutines-core</artifactId>
+      <version>1.11.0</version>
+      <artifactId>ktor-client-core</artifactId>
+      <version>3.5.1</version>
+      <artifactId>ktor-client-content-negotiation</artifactId>
+      <version>3.5.1</version>
+      <artifactId>ktor-serialization-kotlinx-json</artifactId>
+      <version>3.5.1</version>
+      <artifactId>kotlinx-serialization-json</artifactId>
+      <version>1.11.0</version>
+      <artifactId>kotlinx-collections-immutable</artifactId>
+      <version>0.5.1</version>
+== com/eygraber/sqldelight-androidx-driver
+<version>0.5.0-alpha.7
+<version>0.5.0-alpha.8
+<version>0.5.0-alpha.9
+<version>0.5.0-alpha.10
+<version>0.5.0-alpha.11
+            "requires": "0.33.0"
+            "requires": "1.11.0"
+            "requires": "1.6.0"
+            "requires": "2.3.2"
+            "requires": "2.4.20"
+            "requires": "2.7.1"
+          "group": "androidx.collection",
+          "group": "androidx.sqlite",
+          "group": "app.cash.sqldelight",
+          "group": "org.jetbrains.kotlin",
+          "group": "org.jetbrains.kotlinx",
+          "module": "atomicfu",
+          "module": "collection",
+          "module": "kotlin-stdlib",
+          "module": "kotlinx-coroutines-core",
+          "module": "runtime",
+          "module": "sqlite",
+          "module": "sqlite-async",
+          "version": {
+        "group": "com.eygraber",
+        "module": "sqldelight-androidx-driver-android",
+        "module": "sqldelight-androidx-driver-iosarm64",
+        "module": "sqldelight-androidx-driver-iossimulatorarm64",
+        "module": "sqldelight-androidx-driver-js",
+        "module": "sqldelight-androidx-driver-jvm",
+        "module": "sqldelight-androidx-driver-linuxarm64",
+        "module": "sqldelight-androidx-driver-linuxx64",
+        "module": "sqldelight-androidx-driver-macosarm64",
+        "module": "sqldelight-androidx-driver-tvosarm64",
+        "module": "sqldelight-androidx-driver-tvossimulatorarm64",
+        "module": "sqldelight-androidx-driver-wasm-js",
+        "module": "sqldelight-androidx-driver-watchosarm32",
+        "module": "sqldelight-androidx-driver-watchosarm64",
+        "module": "sqldelight-androidx-driver-watchosdevicearm64",
+        "module": "sqldelight-androidx-driver-watchossimulatorarm64",
+        "version": "0.5.0-alpha.11"
+      "version": "9.7.1"
+    "group": "com.eygraber",
+    "module": "sqldelight-androidx-driver",
+    "version": "0.5.0-alpha.11",

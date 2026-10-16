@@ -1,0 +1,66 @@
+org.jetbrains.kotlin:kotlin-gradle-plugin	stable: 2.4.10 2.4.20 2.4.21 	latest: 2.4.21-RC 2.5.0-Beta1 
+org.jetbrains.compose:compose-gradle-plugin	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.compose.runtime:runtime	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.compose.material3:material3	stable: 1.8.1 1.8.2 1.9.0 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.compose.material:material-icons-core	stable: 1.7.0 1.7.1 1.7.3 	latest: 1.7.1 1.7.3 
+org.jetbrains.compose.components:components-resources	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.compose.ui:ui-test	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose	stable: 2.9.6 2.10.0 2.11.0 	latest: 2.11.0-beta02 2.11.0-rc01 
+org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose	stable: 2.9.6 2.10.0 2.11.0 	latest: 2.11.0-beta02 2.11.0-rc01 
+org.jetbrains.androidx.navigation:navigation-compose	stable: 2.9.0 2.9.1 2.9.2 	latest: 2.10.0-beta01 2.10.0-rc01 
+org.jetbrains.androidx.navigation3:navigation3-ui	stable: 1.1.0 1.1.1 1.1.2 	latest: 1.2.0-beta01 1.2.0-rc01 
+org.jetbrains.androidx.savedstate:savedstate	stable: 1.3.5 1.3.6 1.4.0 	latest: 1.4.0-beta01 1.4.0-rc01 
+app.cash.sqldelight:gradle-plugin	stable: 2.3.2 2.4.0 2.4.1 	latest: 2.4.0-rc2 2.4.1 
+app.cash.sqldelight:sqlite-driver	stable: 2.3.2 2.4.0 2.4.1 	latest: 2.4.0-rc2 2.4.1 
+app.cash.sqldelight:native-driver	stable: 2.3.2 2.4.0 2.4.1 	latest: 2.4.0-rc2 2.4.1 
+app.cash.sqldelight:android-driver	stable: 2.3.2 2.4.0 2.4.1 	latest: 2.4.0-rc2 2.4.1 
+app.cash.sqldelight:coroutines-extensions	stable: 2.3.2 2.4.0 2.4.1 	latest: 2.4.0-rc2 2.4.1 
+app.cash.sqldelight:sqlite-3-38-dialect	stable: 2.3.2 2.4.0 2.4.1 	latest: 2.4.0-rc2 2.4.1 
+io.github.jan-tennert.supabase:bom	stable: 3.6.0 3.7.0 3.8.0 	latest: 3.8.0 3.9.0-beta-1 
+io.github.jan-tennert.supabase:auth-kt	stable: 3.6.0 3.7.0 3.8.0 	latest: 3.8.0 3.9.0-beta-1 
+io.github.jan-tennert.supabase:postgrest-kt	stable: 3.6.0 3.7.0 3.8.0 	latest: 3.8.0 3.9.0-beta-1 
+io.github.jan-tennert.supabase:storage-kt	stable: 3.6.0 3.7.0 3.8.0 	latest: 3.8.0 3.9.0-beta-1 
+io.ktor:ktor-client-core	stable: 3.5.1 3.5.2 3.6.0 	latest: 3.5.2 3.6.0 
+org.jetbrains.kotlinx:kotlinx-coroutines-core	stable: 1.10.1 1.10.2 1.11.0 	latest: 1.11.0-rc01 1.11.0-rc02 
+org.jetbrains.kotlinx:kotlinx-serialization-json	stable: 1.9.0 1.10.0 1.11.0 	latest: 1.11.0 1.12.0-RC 
+org.jetbrains.kotlinx:kotlinx-datetime	stable: 0.7.1-0.6.x-compat 0.8.0 0.8.0-0.6.x-compat 	latest: 0.8.0-rc02 0.8.0-rc02-0.6.x-compat 
+io.coil-kt.coil3:coil-compose	stable: 3.6.1 3.6.2 3.6.3 	latest: 3.6.2 3.6.3 
+co.touchlab:kermit	stable: 2.0.8 2.1.0 2.2.0 	latest: 2.1.0 2.2.0 
+com.russhwolf:multiplatform-settings	stable: 1.1.1 1.2.0 1.3.0 	latest: 1.2.0 1.3.0 
+org.xerial:sqlite-jdbc	stable: 3.53.2.0 3.53.2.1 3.53.4.0 	latest: 3.53.2.1 3.53.4.0 
+io.github.takahirom.roborazzi:roborazzi	stable: 1.74.0 1.75.0 1.76.0 	latest: 1.75.0 1.76.0 
+org.robolectric:robolectric	stable: 4.16 4.16.1 4.17 	latest: 4.17-beta-3 4.17-beta-4 
+org.postgresql:postgresql	stable: 42.7.12 42.7.13 42.7.14 	latest: 42.7.13 42.7.14 
+org.testcontainers:postgresql	stable: 1.21.2 1.21.3 1.21.4 	latest: 1.21.3 1.21.4 
+com.android.tools.build:gradle	stable: 9.3.3 9.4.0 9.4.1 	latest: 9.5.0-alpha09 9.5.0-alpha10 
+androidx.activity:activity-compose	stable: 1.12.3 1.12.4 1.13.0 	latest: 1.14.0-alpha02 1.14.0-alpha03 
+androidx.core:core-ktx	stable: 1.18.0 1.19.0 1.19.1 	latest: 1.19.0-rc01 1.19.1 
+androidx.camera:camera-camera2	stable: 1.6.0 1.6.1 1.6.2 	latest: 1.7.0-alpha02 1.7.0-alpha03 
+com.google.mlkit:barcode-scanning	stable: 17.1.0 17.2.0 17.3.0 	latest: 17.2.0 17.3.0 
+com.google.mlkit:text-recognition	stable: 16.0.0 16.0.1 	latest: 16.0.0-beta6 16.0.1 
+androidx.work:work-runtime	stable: 2.11.1 2.11.2 2.12.0 	latest: 2.12.0-beta01 2.12.0-rc01 
+androidx.compose.ui:ui-test-junit4	stable: 1.11.4 1.12.0 1.12.1 	latest: 1.13.0-alpha03 1.13.0-beta01 
+androidx.test.ext:junit	stable: 1.2.0 1.2.1 1.3.0 	latest: 1.3.0-rc01 1.4.0-alpha01 
+org.gradle.toolchains.foojay-resolver-convention:org.gradle.toolchains.foojay-resolver-convention.gradle.plugin	stable: 0.10.0 1.0.0 1.0.0 	latest: 1.0.0 1.0.0-rc-1 
+androidx.sqlite:sqlite-bundled	stable: 2.6.2 2.7.0 2.7.1 	latest: 2.7.1 2.8.0-alpha01 
+androidx.sqlite:sqlite	stable: 2.6.2 2.7.0 2.7.1 	latest: 2.7.1 2.8.0-alpha01 
+com.eygraber:sqldelight-androidx-driver	stable: 0.2.0 0.2.1 0.2.2 	latest: 0.5.0-alpha.10 0.5.0-alpha.11 
+io.requery:sqlite-android	NOT FOUND
+com.github.requery:sqlite-android	NOT FOUND
+com.ionspin.kotlin:bignum	stable: 0.3.8 0.3.9 0.3.10 	latest: 0.3.9 0.3.10 
+io.ktor:ktor-client-okhttp	stable: 3.5.1 3.5.2 3.6.0 	latest: 3.5.2 3.6.0 
+io.ktor:ktor-client-darwin	stable: 3.5.1 3.5.2 3.6.0 	latest: 3.5.2 3.6.0 
+io.github.jan-tennert.supabase:functions-kt	stable: 3.6.0 3.7.0 3.8.0 	latest: 3.8.0 3.9.0-beta-1 
+org.jetbrains.compose.ui:ui-tooling-preview	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.compose.foundation:foundation	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+io.mockk:mockk	stable: 1.14.7 1.14.9 1.14.11 	latest: 1.14.9 1.14.11 
+app.cash.turbine:turbine	stable: 1.1.0 1.2.0 1.2.1 	latest: 1.2.0 1.2.1 
+org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3	stable: 2.10.0 2.11.0 	latest: 2.11.0-beta02 2.11.0-rc01 
+org.jetbrains.androidx.navigation3:navigation3-runtime	NOT FOUND
+org.jetbrains.compose.ui:ui-backhandler	stable: 1.12.0 1.12.1 1.12.2 	latest: 1.13.0-alpha01 1.13.0-alpha02 
+org.jetbrains.androidx.navigationevent:navigationevent-compose	stable: 1.0.0 1.0.1 1.1.0 	latest: 1.1.0-beta01 1.1.0-rc01 
+org.jetbrains.compose.material3.adaptive:adaptive-navigation3	stable: 1.3.0 	latest: 1.3.0-beta02 1.3.0-rc01 
+ubuntu: Ubuntu 24.04.5 LTS
+java: openjdk version "17.0.20.1" 2026-08-18
+android platforms: android-34 android-34-ext10 android-34-ext11 android-34-ext12 android-34-ext8 android-35 android-35-ext14 android-35-ext15 android-36 android-36-ext18 android-36-ext19 android-36.1 android-37.0 android-37.1 android-37.2 android-37.2-beta1 android-37.2-beta2 android-37.2-beta3 
+build-tools: 34.0.0 35.0.0 35.0.1 36.0.0 36.1.0 37.0.0 

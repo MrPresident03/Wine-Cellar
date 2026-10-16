@@ -1,0 +1,148 @@
+== files
+src-ui.jar/webMain/androidx/navigation3/ui/NavDisplay.web.kt
+src-ui.jar/iosMain/androidx/navigation3/ui/NavDisplay.ios.kt
+src-ui.jar/commonMain/androidx/navigation3/ui/NavDisplay.kt
+src-ui.jar/commonMain/androidx/navigation3/ui/LocalNavAnimatedContentScope.kt
+src-ui.jar/commonMain/androidx/navigation3/ListUtils.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/DialogScene.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SceneState.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/BackStackAwareLifecycleNavEntryDecorator.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SceneInfo.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SharedEntryInSceneNavEntryDecorator.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SceneStrategy.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/Scene.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SceneDecoratorStrategy.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SinglePaneScene.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/SceneSetupNavEntryDecorator.kt
+src-ui.jar/commonMain/androidx/navigation3/scene/OverlayScene.kt
+== NavDisplay
+public fun <T : Any> NavDisplay(
+    backStack: List<T>,
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    onBack: () -> Unit = {
+        if (backStack is MutableList<T>) {
+            backStack.removeLastOrNull()
+        }
+    },
+    entryDecorators: List<NavEntryDecorator<T>> =
+        listOf(rememberSaveableStateHolderNavEntryDecorator()),
+    sceneStrategy: SceneStrategy<T> = SinglePaneSceneStrategy(),
+    sizeTransform: SizeTransform? = null,
+    transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
+        defaultTransitionSpec(),
+    popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
+        defaultPopTransitionSpec(),
+    predictivePopTransitionSpec:
+        AnimatedContentTransitionScope<Scene<T>>.(
+            @NavigationEvent.SwipeEdge Int
+        ) -> ContentTransform =
+        defaultPredictivePopTransitionSpec(),
+    entryProvider: (key: T) -> NavEntry<T>,
+) {
+    NavDisplay(
+        backStack = backStack,
+        modifier = modifier,
+        contentAlignment = contentAlignment,
+        onBack = onBack,
+        entryDecorators = entryDecorators,
+        sceneStrategies = listOf(sceneStrategy),
+        sharedTransitionScope = null,
+        sizeTransform = sizeTransform,
+        transitionSpec = transitionSpec,
+        popTransitionSpec = popTransitionSpec,
+        predictivePopTransitionSpec = predictivePopTransitionSpec,
+        entryProvider = entryProvider,
+    )
+}
+
+/**
+--
+public fun <T : Any> NavDisplay(
+    backStack: List<T>,
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    onBack: () -> Unit = {
+        if (backStack is MutableList<T>) {
+            backStack.removeLastOrNull()
+        }
+    },
+    entryDecorators: List<NavEntryDecorator<T>> =
+        listOf(rememberSaveableStateHolderNavEntryDecorator()),
+    sceneStrategies: List<SceneStrategy<T>> = listOf(SinglePaneSceneStrategy()),
+    sceneDecoratorStrategies: List<SceneDecoratorStrategy<T>> = emptyList(),
+    sharedTransitionScope: SharedTransitionScope? = null,
+    sizeTransform: SizeTransform? = null,
+    transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
+        defaultTransitionSpec(),
+    popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
+        defaultPopTransitionSpec(),
+    predictivePopTransitionSpec:
+        AnimatedContentTransitionScope<Scene<T>>.(
+            @NavigationEvent.SwipeEdge Int
+        ) -> ContentTransform =
+        defaultPredictivePopTransitionSpec(),
+    entryProvider: (key: T) -> NavEntry<T>,
+) {
+    require(backStack.isNotEmpty()) { "NavDisplay backstack cannot be empty" }
+
+    val entries =
+        rememberDecoratedNavEntries(
+            backStack = backStack,
+            entryDecorators = entryDecorators,
+            entryProvider = entryProvider,
+        )
+
+    NavDisplay(
+        entries = entries,
+        sceneStrategies = sceneStrategies,
+        sceneDecoratorStrategies = sceneDecoratorStrategies,
+        sharedTransitionScope = sharedTransitionScope,
+        modifier = modifier,
+--
+public fun <T : Any> NavDisplay(
+    entries: List<NavEntry<T>>,
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    sceneStrategy: SceneStrategy<T> = SinglePaneSceneStrategy(),
+    sizeTransform: SizeTransform? = null,
+    transitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
+        defaultTransitionSpec(),
+    popTransitionSpec: AnimatedContentTransitionScope<Scene<T>>.() -> ContentTransform =
+        defaultPopTransitionSpec(),
+    predictivePopTransitionSpec:
+        AnimatedContentTransitionScope<Scene<T>>.(
+            @NavigationEvent.SwipeEdge Int
+        ) -> ContentTransform =
+        defaultPredictivePopTransitionSpec(),
+    onBack: () -> Unit,
+) {
+    NavDisplay(
+        entries = entries,
+        sceneStrategies = listOf(sceneStrategy),
+        sharedTransitionScope = null,
+        modifier = modifier,
+        contentAlignment = contentAlignment,
+        sizeTransform = sizeTransform,
+        transitionSpec = transitionSpec,
+        popTransitionSpec = popTransitionSpec,
+        predictivePopTransitionSpec = predictivePopTransitionSpec,
+        onBack = onBack,
+    )
+}
+
+/**
+ * A nav display that renders and animates between different [Scene]s, each of which can render one
+ * or more [NavEntry]s.
+ *
+ * The [Scene]s are calculated with the given list of [SceneStrategy] in the order of the list. If
+grep: write error: Broken pipe
+== entryProvider
+== decorators
+39:internal fun <T : Any> rememberBackStackAwareLifecycleNavEntryDecorator(
+31:internal fun <T : Any> rememberSharedEntryInSceneNavEntryDecorator(
+56:public fun interface SceneDecoratorStrategy<T : Any> {
+64:    public fun SceneDecoratorStrategyScope<T>.decorateScene(scene: Scene<T>): Scene<T>
+83:internal fun <T : Any> SceneDecoratorStrategy<T>.decorateScene(
+30:internal fun <T : Any> rememberSceneSetupNavEntryDecorator(): SceneSetupNavEntryDecorator<T> =
+lifecycle-viewmodel-navigation3 release: 2.11.0
