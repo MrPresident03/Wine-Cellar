@@ -36,7 +36,7 @@ class SearchIndexer(private val db: HouseOfVinoDatabase) {
                 vintage = vintageText(s.vintage_kind, s.vintage_year),
                 region = join(s.country, s.region, s.sub_region, s.appellation),
                 grapes = grapesText(s.grapes),
-                tags = s.tag_names.orEmpty(),
+                tags = s.tag_names,
                 notes = join(s.wine_notes, s.vintage_notes, s.drink_note, s.lot_text),
             ),
         )
@@ -60,7 +60,7 @@ class SearchIndexer(private val db: HouseOfVinoDatabase) {
                 vintage = vintageText(s.vintage_kind, s.vintage_year),
                 region = join(s.country, s.region, s.sub_region, s.appellation),
                 grapes = grapesText(s.grapes),
-                tags = s.tag_names.orEmpty(),
+                tags = s.tag_names,
                 notes = join(s.appearance, s.nose, s.palate, s.finish, s.conclusion, jsonList(s.aromas), s.notes, s.occasion, s.companions, s.food_pairing, s.place),
             ),
         )
@@ -82,7 +82,7 @@ class SearchIndexer(private val db: HouseOfVinoDatabase) {
                 vintage = vintage,
                 region = join(s.country, s.linked_region, s.region, s.appellation),
                 grapes = grapesText(s.grapes),
-                tags = s.tag_names.orEmpty(),
+                tags = s.tag_names,
                 notes = join(s.notes, s.merchant_text),
             ),
         )

@@ -61,7 +61,7 @@ object HovIcons {
     }
     val Glass by lazy {
         icon("glass") {
-            moveTo(7f, 3f); lineTo(17f, 3f); cubicTo(17.2f, 9f, 15f, 12.5f, 12f, 12.5f); cubicTo(9f, 12.5f, 6.8f, 9f, 7f, 3f); close()
+            moveTo(7f, 3f); lineTo(17f, 3f); curveTo(17.2f, 9f, 15f, 12.5f, 12f, 12.5f); curveTo(9f, 12.5f, 6.8f, 9f, 7f, 3f); close()
             line(7.4f, 7f, 16.6f, 7f)
             line(12f, 12.5f, 12f, 20.5f); line(8.5f, 20.5f, 15.5f, 20.5f)
         }
@@ -70,9 +70,9 @@ object HovIcons {
     val Chart by lazy { icon("chart") { line(4f, 20f, 20f, 20f); line(6.5f, 16.5f, 6.5f, 12f); line(11f, 16.5f, 11f, 7f); line(15.5f, 16.5f, 15.5f, 10f); line(19.5f, 16.5f, 19.5f, 4.5f) } }
     val Place by lazy {
         icon("place") {
-            moveTo(12f, 21.5f); cubicTo(12f, 21.5f, 5f, 15f, 5f, 9.75f)
+            moveTo(12f, 21.5f); curveTo(12f, 21.5f, 5f, 15f, 5f, 9.75f)
             arcTo(7f, 7f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 19f, y1 = 9.75f)
-            cubicTo(19f, 15f, 12f, 21.5f, 12f, 21.5f); close()
+            curveTo(19f, 15f, 12f, 21.5f, 12f, 21.5f); close()
             circle(12f, 9.75f, 2.5f)
         }
     }
@@ -129,7 +129,7 @@ object HovIcons {
             moveTo(6.5f, 7f); lineTo(7.5f, 20f); lineTo(16.5f, 20f); lineTo(17.5f, 7f)
         }
     }
-    val Person by lazy { icon("person") { circle(12f, 8.5f, 3.5f); moveTo(5f, 20f); cubicTo(5f, 15.5f, 8f, 13.5f, 12f, 13.5f); cubicTo(16f, 13.5f, 19f, 15.5f, 19f, 20f) } }
+    val Person by lazy { icon("person") { circle(12f, 8.5f, 3.5f); moveTo(5f, 20f); curveTo(5f, 15.5f, 8f, 13.5f, 12f, 13.5f); curveTo(16f, 13.5f, 19f, 15.5f, 19f, 20f) } }
     val Sync by lazy {
         icon("sync") {
             moveTo(19f, 12f); arcTo(7f, 7f, 0f, isMoreThanHalf = true, isPositiveArc = true, x1 = 16.95f, y1 = 7.05f)

@@ -15,7 +15,7 @@ class OutboxTest {
         repeat(3) { wines.updateWine(session, w, WineInput("Neudorf", "Moutere Chardonnay $it")) }
         val rows = db.outboxQueries.all().executeAsList().filter { it.entity == "wine" && it.entity_id == w }
         assertEquals(1, rows.size)
-        assertEquals(4L, rows.single().local_version)
+        assertEquals(5L, rows.single().local_version) // insert + 3 edits, each bumping
         assertEquals(0L, rows.single().base_rev)
         assertNull(rows.single().base_json) // never synced: nothing to merge against
     }

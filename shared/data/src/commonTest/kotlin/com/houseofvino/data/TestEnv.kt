@@ -57,10 +57,11 @@ class TestEnv(startMillis: Long = 1_790_000_000_000L) {
     fun movementCount(): Long = scalarLong("SELECT count(*) FROM inventory_movement")
 }
 
-inline fun <T> withEnv(block: TestEnv.() -> T): T {
+/** Test bodies must return Unit (JUnit and Kotlin/Native test runners require it). */
+inline fun withEnv(block: TestEnv.() -> Unit) {
     val env = TestEnv()
     try {
-        return env.block()
+        env.block()
     } finally {
         env.close()
     }

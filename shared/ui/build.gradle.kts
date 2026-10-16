@@ -30,6 +30,8 @@ kotlin {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
+        optIn.add("androidx.compose.foundation.layout.ExperimentalLayoutApi")
+        optIn.add("androidx.compose.ui.ExperimentalComposeUiApi")
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 

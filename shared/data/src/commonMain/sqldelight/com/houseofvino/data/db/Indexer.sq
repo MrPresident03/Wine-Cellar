@@ -7,14 +7,14 @@ SELECT
     v.deleted_at AS vintage_deleted,
     w.producer, w.name, w.classification, w.country, w.region, w.sub_region, w.appellation, w.grapes,
     w.notes AS wine_notes, w.deleted_at AS wine_deleted,
-    (SELECT group_concat(t.name, ' ')
+    coalesce((SELECT group_concat(t.name, ' ')
        FROM tag_link tl JOIN tag t ON t.id = tl.tag_id
       WHERE tl.deleted_at IS NULL AND t.deleted_at IS NULL
         AND ((tl.target_type = 'wine' AND tl.target_id = w.id)
           OR (tl.target_type = 'vintage' AND tl.target_id = v.id)
-          OR (tl.target_type = 'lot' AND tl.target_id IN (SELECT l2.id FROM lot l2 WHERE l2.vintage_id = v.id)))) AS tag_names,
-    (SELECT group_concat(coalesce(l.source, '') || ' ' || coalesce(l.source_ref, '') || ' ' || coalesce(l.notes, ''), ' ')
-       FROM lot l WHERE l.vintage_id = v.id AND l.deleted_at IS NULL) AS lot_text
+          OR (tl.target_type = 'lot' AND tl.target_id IN (SELECT l2.id FROM lot l2 WHERE l2.vintage_id = v.id)))), '') AS tag_names,
+    coalesce((SELECT group_concat(coalesce(l.source, '') || ' ' || coalesce(l.source_ref, '') || ' ' || coalesce(l.notes, ''), ' ')
+       FROM lot l WHERE l.vintage_id = v.id AND l.deleted_at IS NULL), '') AS lot_text
 FROM wine_vintage v JOIN wine w ON w.id = v.wine_id
 WHERE v.id = ?;
 
@@ -23,9 +23,9 @@ SELECT
     n.id, n.household_id, n.deleted_at, n.appearance, n.nose, n.palate, n.finish, n.conclusion, n.aromas, n.notes,
     n.occasion, n.companions, n.food_pairing, n.place,
     v.vintage_kind, v.vintage_year, w.producer, w.name, w.country, w.region, w.sub_region, w.appellation, w.grapes,
-    (SELECT group_concat(t.name, ' ')
+    coalesce((SELECT group_concat(t.name, ' ')
        FROM tag_link tl JOIN tag t ON t.id = tl.tag_id
-      WHERE tl.deleted_at IS NULL AND t.deleted_at IS NULL AND tl.target_type = 'tasting' AND tl.target_id = n.id) AS tag_names
+      WHERE tl.deleted_at IS NULL AND t.deleted_at IS NULL AND tl.target_type = 'tasting' AND tl.target_id = n.id), '') AS tag_names
 FROM tasting_note n
 JOIN wine_vintage v ON v.id = n.vintage_id
 JOIN wine w ON w.id = v.wine_id
@@ -36,10 +36,10 @@ SELECT
     i.id, i.household_id, i.deleted_at, i.title, i.producer, i.wine_name, i.region, i.vintage_from, i.vintage_to, i.accepts_nv, i.notes,
     w.producer AS linked_producer, w.name AS linked_name, w.country, w.region AS linked_region, w.appellation, w.grapes,
     v.vintage_kind, v.vintage_year,
-    (SELECT group_concat(coalesce(k.merchant, '') || ' ' || coalesce(k.note, ''), ' ') FROM wishlist_link k WHERE k.item_id = i.id AND k.deleted_at IS NULL) AS merchant_text,
-    (SELECT group_concat(t.name, ' ')
+    coalesce((SELECT group_concat(coalesce(k.merchant, '') || ' ' || coalesce(k.note, ''), ' ') FROM wishlist_link k WHERE k.item_id = i.id AND k.deleted_at IS NULL), '') AS merchant_text,
+    coalesce((SELECT group_concat(t.name, ' ')
        FROM tag_link tl JOIN tag t ON t.id = tl.tag_id
-      WHERE tl.deleted_at IS NULL AND t.deleted_at IS NULL AND tl.target_type = 'wishlist' AND tl.target_id = i.id) AS tag_names
+      WHERE tl.deleted_at IS NULL AND t.deleted_at IS NULL AND tl.target_type = 'wishlist' AND tl.target_id = i.id), '') AS tag_names
 FROM wishlist_item i
 LEFT JOIN wine w ON w.id = i.wine_id
 LEFT JOIN wine_vintage v ON v.id = i.vintage_id
