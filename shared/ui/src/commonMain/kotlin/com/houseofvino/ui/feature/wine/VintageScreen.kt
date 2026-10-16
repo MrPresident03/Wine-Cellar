@@ -279,10 +279,12 @@ private fun VintageContent(
 fun MovementLine(m: MovementRecord, page: VintagePage, canUndo: Boolean, onUndo: (String) -> Unit) {
     val c = Hov.colors
     val graph = LocalGraph.current
+    val from = m.fromLocationId
+    val to = m.toLocationId
     val where = when {
-        m.fromLocationId != null && m.toLocationId != null -> "${placeName(m.fromLocationId, page)} → ${placeName(m.toLocationId, page)}"
-        m.toLocationId != null -> "into ${placeName(m.toLocationId, page)}"
-        m.fromLocationId != null -> "from ${placeName(m.fromLocationId, page)}"
+        from != null && to != null -> "${placeName(from, page)} → ${placeName(to, page)}"
+        to != null -> "into ${placeName(to, page)}"
+        from != null -> "from ${placeName(from, page)}"
         else -> ""
     }
     Column(Modifier.fillMaxWidth()) {
