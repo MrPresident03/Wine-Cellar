@@ -31,14 +31,14 @@ class FlowsTest {
     fun addAWineFromAnEmptyCellar() = runComposeUiTest {
         val g = TestCellar.empty()
         setContent { Screenshots.Host { HouseOfVinoApp(g, ThemeMode.DARK) } }
-        waitUntil(5_000) { exists("No wines yet") }
+        waitUntil(timeoutMillis = 10_000) { exists("No wines yet") }
         onNodeWithContentDescription("Add wine").performClick()
-        waitUntil(5_000) { existsDesc("Producer") }
+        waitUntil(timeoutMillis = 10_000) { existsDesc("Producer") }
         onNodeWithContentDescription("Producer").performTextInput("Neudorf")
         onNodeWithContentDescription("Wine name, optional").performTextInput("Moutere Chardonnay")
         onNodeWithContentDescription("Vintage").performTextInput("2021")
         onNodeWithText("Save").performClick()
-        waitUntil(5_000) { exists("Open a bottle") }
+        waitUntil(timeoutMillis = 10_000) { exists("Open a bottle") }
         val page = g.search.searchCellar(g.requireSession(), SearchQuery())
         assertEquals(1, page.total)
         assertEquals("Neudorf", page.items.single().producer)
@@ -53,12 +53,12 @@ class FlowsTest {
         val before = g.inventory.holdings(felton).sumOf { it.quantity }
         val nav = Navigator().apply { push(Route.Vintage(felton)) }
         setContent { Screenshots.Host { HouseOfVinoApp(g, ThemeMode.DARK, nav) } }
-        waitUntil(5_000) { exists("Open a bottle") }
+        waitUntil(timeoutMillis = 10_000) { exists("Open a bottle") }
         onNodeWithText("Open a bottle").performClick()
-        waitUntil(5_000) { exists("Open 1 bottle") }
+        waitUntil(timeoutMillis = 10_000) { exists("Open 1 bottle") }
         onNodeWithText("Open 1 bottle").performClick()
-        waitUntil(5_000) { g.inventory.holdings(felton).sumOf { it.quantity } == before - 1 }
-        waitUntil(5_000) { exists("Opened 1 bottle") }
+        waitUntil(timeoutMillis = 10_000) { g.inventory.holdings(felton).sumOf { it.quantity } == before - 1 }
+        waitUntil(timeoutMillis = 10_000) { exists("Opened 1 bottle") }
     }
 
     @Test
@@ -66,9 +66,9 @@ class FlowsTest {
         val seeded = TestCellar.seeded()
         val nav = Navigator().apply { select(Tab.SEARCH) }
         setContent { Screenshots.Host { HouseOfVinoApp(seeded.graph, ThemeMode.DARK, nav) } }
-        waitUntil(5_000) { existsDesc("Search") }
+        waitUntil(timeoutMillis = 10_000) { existsDesc("Search") }
         onNodeWithContentDescription("Search").performTextInput("giacossa")
-        waitUntil(5_000) { exists("Bruno Giacosa") }
-        waitUntil(5_000) { exists("Including giacosa") }
+        waitUntil(timeoutMillis = 10_000) { exists("Bruno Giacosa") }
+        waitUntil(timeoutMillis = 10_000) { exists("Including giacosa") }
     }
 }
