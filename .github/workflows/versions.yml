@@ -1,0 +1,41 @@
+name: Dependency versions
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [house-of-vino]
+    paths: ['.github/workflows/versions.yml', 'tools/ci/artifacts.txt']
+permissions:
+  contents: write
+jobs:
+  versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Query Maven metadata
+        run: |
+          set +e
+          mkdir -p out
+          while read -r repo coord; do
+            [ -z "$repo" ] && continue; case "$repo" in \#*) continue;; esac
+            g="${coord%%:*}"; a="${coord##*:}"; path="$(echo "$g" | tr . /)/$a/maven-metadata.xml"
+            case "$repo" in
+              central) base=https://repo.maven.apache.org/maven2 ;;
+              google) base=https://dl.google.com/dl/android/maven2 ;;
+              plugins) base=https://plugins.gradle.org/m2 ;;
+            esac
+            xml="$(curl -fsSL "$base/$path")"
+            if [ -z "$xml" ]; then echo "$coord	NOT FOUND" >> out/versions.tsv; continue; fi
+            all="$(echo "$xml" | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g')"
+            stable="$(echo "$all" | grep -viE 'alpha|beta|rc|dev|eap|snapshot|-m[0-9]' | sort -V | tail -3 | tr '\n' ' ')"
+            latest="$(echo "$all" | sort -V | tail -2 | tr '\n' ' ')"
+            echo "$coord	stable: $stable	latest: $latest" >> out/versions.tsv
+          done < tools/ci/artifacts.txt
+          cat out/versions.tsv
+      - name: Xcode and runner images
+        run: echo "ubuntu: $(lsb_release -ds); java: $(java -version 2>&1 | head -1); android sdk: $ANDROID_HOME $(ls $ANDROID_HOME/platforms 2>/dev/null | tr '\n' ' ') build-tools: $(ls $ANDROID_HOME/build-tools 2>/dev/null | tr '\n' ' ')" >> out/versions.tsv
+      - name: Publish results to ci/versions branch
+        run: |
+          cd out && git init -q -b ci/versions && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "versions $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" ci/versions
